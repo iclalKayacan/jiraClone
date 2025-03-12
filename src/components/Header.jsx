@@ -4,11 +4,8 @@ import { FaJira } from "react-icons/fa";
 const Header = () => {
   return (
     <header className="flex items-center justify-between bg-white px-4 py-2 shadow-sm border-b border-gray-200">
-      {/* Sol Taraf: Logo + Proje Adı + Sekmeler */}
       <div className="flex items-center gap-8">
-        {/* Logo veya Jira benzeri ikon */}
         <div className="flex items-center gap-2">
-          {/* Örnek resim; kendi logonuz varsa değiştirebilirsiniz */}
           <img
             src="/jira-logo.png"
             alt="Jira Logo"

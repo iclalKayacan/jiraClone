@@ -1,15 +1,23 @@
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
+// pages/index.js
+import TopNav from "@/components/TopNav";
+import ProjectNav from "@/components/ProjectNav";
+import SideBar from "@/components/SideBar";
 import Board from "@/components/Board";
 
-export default function DashboardPage() {
+export default function Home() {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        {/* İçerik ya da Board görünümü */}
-        <Board />
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* En üst nav */}
+      <TopNav />
+
+      {/* Altında proje menüsü + ana içerik */}
+      <div className="flex flex-1">
+        <SideBar />
+
+        <div className="flex flex-col flex-1">
+          <ProjectNav />
+          <Board />
+        </div>
       </div>
     </div>
   );

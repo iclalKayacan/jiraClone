@@ -2,51 +2,52 @@
 import React from "react";
 import Column from "./Column";
 
-const Board = () => {
-  // Örnek olarak statik veri tutabiliriz
+export default function Board() {
+  // Statik örnek veri
   const columns = [
     {
       id: 1,
-      title: "To Do",
+      title: "TO DO",
+      color: "gray",
       tasks: [
         {
-          id: 101,
-          name: "Full-Stack ilk proje",
-          dueDate: "23 MAR",
+          id: 1,
+          title: "Full-Stack ilk proje",
+          date: "23 MAR",
           label: "FS-1",
+          progress: "0/4",
         },
         {
-          id: 102,
-          name: "Mobil App Öğrenimi",
-          dueDate: "30 MAR",
+          id: 2,
+          title: "Mobil App Öğrenimi",
+          date: "30 MAR",
           label: "FS-2",
+          progress: "",
         },
       ],
     },
-    {
-      id: 2,
-      title: "In Progress",
-      tasks: [],
-    },
-    {
-      id: 3,
-      title: "Kontrol Edilsin",
-      tasks: [],
-    },
-    {
-      id: 4,
-      title: "Done",
-      tasks: [],
-    },
+    { id: 2, title: "IN PROGRESS", color: "blue", tasks: [] },
+    { id: 3, title: "KONTROL EDİLSİN", color: "gray", tasks: [] },
+    { id: 4, title: "DONE", color: "green", tasks: [] },
   ];
 
   return (
-    <main className="p-4 flex gap-4 overflow-auto bg-gray-50">
-      {columns.map((col) => (
-        <Column key={col.id} title={col.title} tasks={col.tasks} />
-      ))}
-    </main>
-  );
-};
+    <div className="flex-1 overflow-auto bg-blue-50 p-4">
+      {/* Arama çubuğu (Board üzerindeki) */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search board"
+          className="px-3 py-2 border border-gray-300 rounded w-64 text-sm outline-none focus:border-blue-500"
+        />
+      </div>
 
-export default Board;
+      {/* Sütunlar */}
+      <div className="flex items-start gap-4">
+        {columns.map((col) => (
+          <Column key={col.id} column={col} />
+        ))}
+      </div>
+    </div>
+  );
+}
