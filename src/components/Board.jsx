@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
+import TaskModal from "./TaskModal";
 
 /**
- * Aynı sütunda kartların ya da sütunların sırasını değiştirir
+ * Aynı sütunda kartların sırasını değiştirir
  */
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
@@ -40,6 +41,7 @@ export default function Board() {
           date: "30 MAR",
           label: "FS-2",
           progress: "",
+          description: "React Native ve Flutter gibi seçenekleri incele.",
         },
       ],
     },
@@ -53,12 +55,17 @@ export default function Board() {
           date: "23 MAR",
           label: "FS-1",
           progress: "0/4",
+          description: "Hem front-end hem back-end taraflarını geliştir.",
         },
       ],
     },
     { id: "col-3", title: "KONTROL EDİLSİN", tasks: [] },
     { id: "col-4", title: "DONE", tasks: [] },
   ]);
+
+  // Modal kontrolü ve seçili Task
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   /**
    * "Create" popup'ından gelen yeni görevi ilgili sütuna ekleyen fonksiyon
@@ -73,6 +80,7 @@ export default function Board() {
               ...col.tasks,
               {
                 id: "task-" + Date.now(), // her yeni karta farklı ID
+                description: "",
                 ...taskData,
               },
             ],
@@ -84,24 +92,52 @@ export default function Board() {
   };
 
   /**
-   * Kartlar veya sütunlar sürüklenip bırakıldığında çağrılır
+   * Bir karta tıklanınca çalışan fonksiyon
+   */
+  const handleSelectTask = (task) => {
+    setSelectedTask(task);
+    setShowModal(true);
+  };
+
+  /**
+   * Görevi güncelle (modal içi Save)
+   */
+  const handleUpdateTask = (updatedTask) => {
+    // columns içinde bu id'ye sahip kartı bul, güncelle
+    const newColumns = columns.map((col) => {
+      return {
+        ...col,
+        tasks: col.tasks.map((t) =>
+          t.id === updatedTask.id ? { ...updatedTask } : t
+        ),
+      };
+    });
+    setColumns(newColumns);
+  };
+
+  /**
+   * Görevi sil (modal içi Delete)
+   */
+  const handleDeleteTask = (taskId) => {
+    const newColumns = columns.map((col) => {
+      return {
+        ...col,
+        tasks: col.tasks.filter((t) => t.id !== taskId),
+      };
+    });
+    setColumns(newColumns);
+  };
+
+  /**
+   * Kartlar sürüklenip bırakıldığında çağrılır
    */
   const onDragEnd = (result) => {
-    const { source, destination, type } = result;
-
+    const { source, destination } = result;
     // destination yoksa (ör. sürükleme alan dışına bırakıldıysa) iptal
     if (!destination) return;
 
-    // 1) Sütunları (COLUMN) sürüklediysek
-    if (type === "COLUMN") {
-      const newCols = reorder(columns, source.index, destination.index);
-      setColumns(newCols);
-      return;
-    }
-
-    // 2) Kartları (TASK) sürüklediysek
+    // Aynı sütun içinde mi?
     if (source.droppableId === destination.droppableId) {
-      // Aynı sütun içinde sıralamayı değiştir
       const colIndex = columns.findIndex(
         (col) => col.id === source.droppableId
       );
@@ -118,7 +154,7 @@ export default function Board() {
       };
       setColumns(newColumns);
     } else {
-      // Farklı sütunlar arası kart taşıma
+      // Farklı sütunlar arası taşıma
       const sourceColIndex = columns.findIndex(
         (col) => col.id === source.droppableId
       );
@@ -142,45 +178,39 @@ export default function Board() {
         ...newColumns[destColIndex],
         tasks: newDest,
       };
-
       setColumns(newColumns);
     }
+  };
+
+  // Modal kapatma
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedTask(null);
   };
 
   return (
     <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
       <DragDropContext onDragEnd={onDragEnd}>
-        {/* 
-          Sütunları sürüklemek için: "board" adında bir Droppable
-          direction="horizontal" & type="COLUMN"
-        */}
-        <Droppable droppableId="board" direction="horizontal" type="COLUMN">
-          {(provided) => (
-            <div
-              className="flex gap-4"
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {columns.map((col, index) => (
-                // Her sütunu Draggable yapıyoruz
-                <Draggable draggableId={col.id} index={index} key={col.id}>
-                  {(providedDraggable) => (
-                    <div
-                      ref={providedDraggable.innerRef}
-                      {...providedDraggable.draggableProps}
-                      {...providedDraggable.dragHandleProps}
-                    >
-                      {/* Sütunun içeriği (Column bileşeni) */}
-                      <Column column={col} onCreateTask={handleCreateTask} />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+        <div className="flex gap-4">
+          {columns.map((col) => (
+            <Column
+              key={col.id}
+              column={col}
+              onCreateTask={handleCreateTask}
+              onSelectTask={handleSelectTask} // Kart tıklandığında Board'a bildirecek
+            />
+          ))}
+        </div>
       </DragDropContext>
+
+      {showModal && selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          onClose={closeModal}
+          onUpdateTask={handleUpdateTask}
+          onDeleteTask={handleDeleteTask}
+        />
+      )}
     </div>
   );
 }
