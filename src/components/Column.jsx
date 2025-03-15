@@ -1,30 +1,33 @@
-"use client"; // Eğer Next.js 13+ App Router
+"use client"; // Next.js 13+ App Router'daysanız ekleyin
 
-import React from "react";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import React, { useState } from "react";
+import { Droppable, Draggable } from "react-beautiful-dnd";
+import CreateTaskPopup from "./CreateTaskPopup";
 
-export default function Column({ column }) {
+export default function Column({ column, onCreateTask }) {
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Yeni görev formundan gelen veriyi, ilgili sütuna eklemek için
+  const handleCreateTask = (taskData) => {
+    onCreateTask(column.id, taskData);
+  };
+
   return (
-    <div className="w-64 bg-white border border-gray-200 rounded-md shadow-sm mr-4">
-      {/* Sütun Başlığı */}
-      <div className="flex items-center justify-between px-3 py-2 border-b">
-        <h2 className="text-sm font-semibold text-gray-700">
+    <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
+      {/* Sütun başlığı */}
+      <div className="flex items-center justify-between px-3 py-2">
+        <h2 className="text-xs font-bold uppercase tracking-wide text-[#5e6c84]">
           {column.title} ({column.tasks.length})
         </h2>
-        {/* 
-         Buraya isterseniz 
-         {...providedCol.dragHandleProps}
-         verip sadece başlıktan sürükleme yapabilirsiniz (sütunlar için).
-        */}
       </div>
 
-      {/* Kartlar için Droppable */}
+      {/* Kartlar için Droppable alan */}
       <Droppable droppableId={column.id} type="TASK">
         {(provided) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="p-2 flex flex-col gap-2"
+            className="p-2 flex flex-col gap-2 min-h-[50px]"
           >
             {column.tasks.map((task, index) => (
               <Draggable draggableId={task.id} index={index} key={task.id}>
@@ -39,8 +42,9 @@ export default function Column({ column }) {
                         ? "0 4px 8px rgba(0,0,0,0.2)"
                         : "none",
                     }}
-                    className="border border-gray-300 rounded p-2 bg-white hover:shadow"
+                    className="border border-gray-300 rounded p-2 bg-white hover:shadow transition-shadow"
                   >
+                    {/* Kart içeriği */}
                     <h3 className="text-sm font-medium text-gray-800">
                       {task.title}
                     </h3>
@@ -68,14 +72,27 @@ export default function Column({ column }) {
               </Draggable>
             ))}
             {provided.placeholder}
-
-            {/* + Create butonu */}
-            <button className="text-blue-500 text-sm px-2 py-1 hover:bg-gray-100 rounded w-full text-left">
-              + Create
-            </button>
           </div>
         )}
       </Droppable>
+
+      {/* +Create butonu */}
+      <div className="px-3 pb-3">
+        <button
+          onClick={() => setShowPopup((prev) => !prev)}
+          className="mt-1 text-blue-600 text-sm px-2 py-1 hover:bg-gray-100 rounded w-full text-left"
+        >
+          + Create
+        </button>
+
+        {/* Create Task Popup */}
+        {showPopup && (
+          <CreateTaskPopup
+            onClose={() => setShowPopup(false)}
+            onCreate={handleCreateTask}
+          />
+        )}
+      </div>
     </div>
   );
 }

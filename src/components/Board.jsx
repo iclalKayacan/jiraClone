@@ -1,15 +1,31 @@
-"use client"; // Next.js 13+ App Router'da client component gerektiği için
-
+"use client";
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Column from "./Column";
 
-// Dizi içinde elemanları yeniden sıralama (aynı sütun/satır içinde)
+/**
+ * Aynı sütunda kartların ya da sütunların sırasını değiştirir
+ */
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
+}
+
+/**
+ * Farklı sütunlar arası kart taşıma
+ */
+function moveTask(sourceList, destList, source, destination) {
+  const sourceClone = Array.from(sourceList);
+  const destClone = Array.from(destList);
+  const [removed] = sourceClone.splice(source.index, 1);
+  destClone.splice(destination.index, 0, removed);
+
+  return {
+    newSource: sourceClone,
+    newDest: destClone,
+  };
 }
 
 export default function Board() {
@@ -40,94 +56,113 @@ export default function Board() {
         },
       ],
     },
-    {
-      id: "col-3",
-      title: "KONTROL EDİLSİN",
-      tasks: [],
-    },
-    {
-      id: "col-4",
-      title: "DONE",
-      tasks: [],
-    },
+    { id: "col-3", title: "KONTROL EDİLSİN", tasks: [] },
+    { id: "col-4", title: "DONE", tasks: [] },
   ]);
 
   /**
-   * react-beautiful-dnd sürükle-bırak işlemi bittiğinde tetiklenir.
+   * "Create" popup'ından gelen yeni görevi ilgili sütuna ekleyen fonksiyon
+   */
+  const handleCreateTask = (colId, taskData) => {
+    setColumns((prev) =>
+      prev.map((col) => {
+        if (col.id === colId) {
+          return {
+            ...col,
+            tasks: [
+              ...col.tasks,
+              {
+                id: "task-" + Date.now(), // her yeni karta farklı ID
+                ...taskData,
+              },
+            ],
+          };
+        }
+        return col;
+      })
+    );
+  };
+
+  /**
+   * Kartlar veya sütunlar sürüklenip bırakıldığında çağrılır
    */
   const onDragEnd = (result) => {
-    const { destination, source, type } = result;
-    // destination yoksa işlem iptal
+    const { source, destination, type } = result;
+
+    // destination yoksa (ör. sürükleme alan dışına bırakıldıysa) iptal
     if (!destination) return;
 
-    // Eğer sütunları (COLUMN) taşıyorsak
+    // 1) Sütunları (COLUMN) sürüklediysek
     if (type === "COLUMN") {
-      const newColumns = reorder(columns, source.index, destination.index);
-      setColumns(newColumns);
+      const newCols = reorder(columns, source.index, destination.index);
+      setColumns(newCols);
       return;
     }
 
-    // Kalan kısım: Kartları (TASK) taşıyoruz
-    const sourceColIndex = columns.findIndex(
-      (col) => col.id === source.droppableId
-    );
-    const destColIndex = columns.findIndex(
-      (col) => col.id === destination.droppableId
-    );
+    // 2) Kartları (TASK) sürüklediysek
+    if (source.droppableId === destination.droppableId) {
+      // Aynı sütun içinde sıralamayı değiştir
+      const colIndex = columns.findIndex(
+        (col) => col.id === source.droppableId
+      );
+      const newColumns = Array.from(columns);
 
-    // Aynı sütun içinde kart sırası değiştiriliyorsa
-    if (sourceColIndex === destColIndex) {
-      const newTasks = reorder(
-        columns[sourceColIndex].tasks,
+      const reorderedTasks = reorder(
+        newColumns[colIndex].tasks,
         source.index,
         destination.index
       );
-      const newColumns = [...columns];
-      newColumns[sourceColIndex] = {
-        ...newColumns[sourceColIndex],
-        tasks: newTasks,
+      newColumns[colIndex] = {
+        ...newColumns[colIndex],
+        tasks: reorderedTasks,
       };
       setColumns(newColumns);
     } else {
-      // Farklı sütunlar arasında kart taşıma
-      const sourceTasks = Array.from(columns[sourceColIndex].tasks);
-      const destTasks = Array.from(columns[destColIndex].tasks);
+      // Farklı sütunlar arası kart taşıma
+      const sourceColIndex = columns.findIndex(
+        (col) => col.id === source.droppableId
+      );
+      const destColIndex = columns.findIndex(
+        (col) => col.id === destination.droppableId
+      );
 
-      const [movedItem] = sourceTasks.splice(source.index, 1);
-      destTasks.splice(destination.index, 0, movedItem);
+      const newColumns = Array.from(columns);
+      const { newSource, newDest } = moveTask(
+        newColumns[sourceColIndex].tasks,
+        newColumns[destColIndex].tasks,
+        source,
+        destination
+      );
 
-      const newColumns = [...columns];
       newColumns[sourceColIndex] = {
         ...newColumns[sourceColIndex],
-        tasks: sourceTasks,
+        tasks: newSource,
       };
       newColumns[destColIndex] = {
         ...newColumns[destColIndex],
-        tasks: destTasks,
+        tasks: newDest,
       };
+
       setColumns(newColumns);
     }
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-blue-50 p-4">
-      {/* Örnek arama kutusu */}
-      <input
-        type="text"
-        placeholder="Search board"
-        className="px-3 py-2 border border-gray-300 rounded w-64 text-sm outline-none focus:border-blue-500 mb-4"
-      />
-
+    <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
       <DragDropContext onDragEnd={onDragEnd}>
-        {/* Sütunları sürüklemek için (direction="horizontal") */}
+        {/* 
+          Sütunları sürüklemek için: "board" adında bir Droppable
+          direction="horizontal" & type="COLUMN"
+        */}
         <Droppable droppableId="board" direction="horizontal" type="COLUMN">
           {(provided) => (
             <div
-              className="flex items-start gap-4"
+              className="flex gap-4"
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
               {columns.map((col, index) => (
+                // Her sütunu Draggable yapıyoruz
                 <Draggable draggableId={col.id} index={index} key={col.id}>
                   {(providedDraggable) => (
                     <div
@@ -135,8 +170,8 @@ export default function Board() {
                       {...providedDraggable.draggableProps}
                       {...providedDraggable.dragHandleProps}
                     >
-                      {/* Sütun bileşeni */}
-                      <Column column={col} />
+                      {/* Sütunun içeriği (Column bileşeni) */}
+                      <Column column={col} onCreateTask={handleCreateTask} />
                     </div>
                   )}
                 </Draggable>
