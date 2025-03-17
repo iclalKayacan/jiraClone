@@ -1,4 +1,5 @@
-"use client";
+"use client"; // Next.js 13+ App Router
+
 import React, { useState } from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import CreateTaskPopup from "./CreateTaskPopup";
@@ -6,12 +7,13 @@ import CreateTaskPopup from "./CreateTaskPopup";
 export default function Column({ column, onCreateTask, onSelectTask }) {
   const [showPopup, setShowPopup] = useState(false);
 
+  // Yeni görev formundan gelen veriyi, ilgili sütuna eklemek için
   const handleCreateTask = (taskData) => {
     onCreateTask(column.id, taskData);
   };
 
   return (
-    <div className="w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
+    <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
       {/* Sütun başlığı */}
       <div className="flex items-center justify-between px-3 py-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-[#5e6c84]">
@@ -40,10 +42,11 @@ export default function Column({ column, onCreateTask, onSelectTask }) {
                         ? "0 4px 8px rgba(0,0,0,0.2)"
                         : "none",
                     }}
+                    // Kart tıklandığında Board'a bildir (modal açılacak)
+                    onClick={() => onSelectTask && onSelectTask(task)}
                     className="border border-gray-300 rounded p-2 bg-white hover:shadow transition-shadow cursor-pointer"
-                    // Kart tıklandığında Board'a haber ver
-                    onClick={() => onSelectTask(task)}
                   >
+                    {/* Kart içeriği */}
                     <h3 className="text-sm font-medium text-gray-800">
                       {task.title}
                     </h3>
@@ -58,7 +61,7 @@ export default function Column({ column, onCreateTask, onSelectTask }) {
                         Progress: {task.progress}
                       </div>
                     )}
-                    {/* Avatar */}
+                    {/* Avatar sağda */}
                     <div className="mt-2 flex justify-end">
                       <img
                         src="/user-avatar.jpg"
@@ -76,7 +79,7 @@ export default function Column({ column, onCreateTask, onSelectTask }) {
       </Droppable>
 
       {/* +Create butonu */}
-      <div className="relative px-3 pb-3">
+      <div className="px-3 pb-3">
         <button
           onClick={() => setShowPopup((prev) => !prev)}
           className="mt-1 text-blue-600 text-sm px-2 py-1 hover:bg-gray-100 rounded w-full text-left"

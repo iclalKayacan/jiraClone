@@ -38,8 +38,6 @@ export default function CreateTaskPopup({ onClose, onCreate }) {
           <option value="Task">Task</option>
           <option value="Bug">Bug</option>
           <option value="Story">Story</option>
-          <option disabled>───</option>
-          <option value="Manage">Manage types</option>
         </select>
         <button
           onClick={handleCreate}

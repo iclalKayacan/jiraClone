@@ -1,21 +1,18 @@
 // components/TopNav.js
 import { FiSearch } from "react-icons/fi";
+import { SiJira } from "react-icons/si";
 
 export default function TopNav() {
   return (
-    <nav className="flex items-center justify-between bg-white border-b border-gray-200 px-4 h-10 text-sm shadow-sm">
-      {/* Sol Menu */}
+    <nav className="flex items-center justify-between bg-white border-b border-gray-200 px-6 h-16 text-sm shadow-sm">
+      {/* Sol Menü */}
       <div className="flex items-center gap-3 h-full">
         <a
           href="#"
-          className="flex items-center px-2 hover:bg-gray-100 h-full border-r border-gray-200"
+          className="flex items-center px-2 hover:bg-gray-100 h-full "
         >
-          {/* Jira Logo gibi bir ikon veya metin */}
-          <img
-            src="/jira-logo.png"
-            alt="Jira"
-            className="h-4 w-4 object-contain"
-          />
+          {/* Jira ikonu (React Icons) */}
+          <SiJira className="w-6 h-6 text-blue-600" />
         </a>
 
         <div className="flex items-center gap-2 px-2 hover:bg-gray-100 h-full">
@@ -51,7 +48,7 @@ export default function TopNav() {
         </div>
       </div>
 
-      {/* Sağ Menu */}
+      {/* Sağ Menü */}
       <div className="flex items-center gap-3">
         {/* Arama ikonu */}
         <button className="p-1 hover:bg-gray-100 rounded">
