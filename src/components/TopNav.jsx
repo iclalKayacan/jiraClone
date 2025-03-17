@@ -1,6 +1,7 @@
 // components/TopNav.js
 import { FiSearch } from "react-icons/fi";
 import { SiJira } from "react-icons/si";
+import Link from "next/link";
 
 export default function TopNav() {
   return (
@@ -19,9 +20,12 @@ export default function TopNav() {
           <span>Your work</span>
         </div>
 
-        <div className="flex items-center gap-2 px-2 hover:bg-gray-100 h-full">
-          <span>Projects</span>
-        </div>
+        <Link
+          href="/projects"
+          className="px-2 hover:bg-gray-100 h-full flex items-center"
+        >
+          Projects
+        </Link>
 
         <div className="flex items-center gap-2 px-2 hover:bg-gray-100 h-full">
           <span>Filters</span>

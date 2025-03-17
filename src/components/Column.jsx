@@ -7,22 +7,19 @@ import CreateTaskPopup from "./CreateTaskPopup";
 export default function Column({ column, onCreateTask, onSelectTask }) {
   const [showPopup, setShowPopup] = useState(false);
 
-  // Yeni görev formundan gelen veriyi, ilgili sütuna eklemek için
   const handleCreateTask = (taskData) => {
     onCreateTask(column.id, taskData);
   };
 
   return (
     <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
-      {/* Sütun başlığı */}
       <div className="flex items-center justify-between px-3 py-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-[#5e6c84]">
           {column.title} ({column.tasks.length})
         </h2>
       </div>
 
-      {/* Kartlar için Droppable */}
-      <Droppable droppableId={column.id} type="TASK">
+      <Droppable droppableId={column.id} type="TASK" isDropDisabled={false}>
         {(provided) => (
           <div
             ref={provided.innerRef}
@@ -42,7 +39,6 @@ export default function Column({ column, onCreateTask, onSelectTask }) {
                         ? "0 4px 8px rgba(0,0,0,0.2)"
                         : "none",
                     }}
-                    // Kart tıklandığında Board'a bildir (modal açılacak)
                     onClick={() => onSelectTask && onSelectTask(task)}
                     className="border border-gray-300 rounded p-2 bg-white hover:shadow transition-shadow cursor-pointer"
                   >
