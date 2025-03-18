@@ -1,21 +1,16 @@
-// components/SideBar.jsx
 "use client";
-
 import Link from "next/link";
-import React from "react";
-import { useProjects } from "@/context/ProjectsContext"; // Yolunuzu ayarlayın
+import { useProjects } from "@/context/ProjectsContext";
 
 export default function SideBar() {
   const { projects } = useProjects();
 
   return (
-    <aside className="flex flex-col w-56 bg-white border-r border-gray-200">
-      {/* Başlık */}
+    <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
       <div className="px-4 py-3 border-b">
         <h2 className="text-gray-500 text-sm font-semibold">Projects</h2>
       </div>
 
-      {/* Proje Listesi */}
       <nav className="flex-1 py-2">
         {projects.map((proj) => (
           <Link

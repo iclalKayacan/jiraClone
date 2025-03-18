@@ -1,21 +1,15 @@
 "use client";
 import React, { useState } from "react";
-
-// EĞER ProjectsContext ile 'projects' alacaksanız:
-// import { useProjects } from "@/context/ProjectsContext";
-
-// Yoksa local useState ile de tutabilirsiniz. Burada context örneği:
 import { useProjects } from "@/context/ProjectsContext";
 import SearchBar from "@/components/SearchBar";
 import NewProjectModal from "@/components/NewProjectModal";
 
 export default function ProjectsPage() {
-  const { projects } = useProjects(); // context'ten alıyoruz, isterseniz local tutabilirsiniz
+  const { projects } = useProjects(); // 2 projeyi de okuyor
   const [searchText, setSearchText] = useState("");
   const [productFilter, setProductFilter] = useState("");
-  const [showModal, setShowModal] = useState(false); // modal kontrol
+  const [showModal, setShowModal] = useState(false);
 
-  // Filtreleme
   const filteredProjects = projects.filter((proj) => {
     const matchSearch = proj.name
       .toLowerCase()
@@ -32,10 +26,7 @@ export default function ProjectsPage() {
 
       {/* Arama ve Filtre */}
       <div className="flex items-center gap-4 mb-6">
-        {/* Burada SearchBar bileşenini çağırıyoruz */}
         <SearchBar searchTerm={searchText} setSearchTerm={setSearchText} />
-
-        {/* Product Filter */}
         <select
           className="border border-gray-300 rounded px-3 py-2 text-sm outline-none 
                      focus:border-blue-500"
@@ -48,7 +39,7 @@ export default function ProjectsPage() {
         </select>
       </div>
 
-      {/* Sağda Create / Templates */}
+      {/* Butonlar */}
       <div className="flex items-center justify-end gap-2 mb-4">
         <button
           onClick={() => setShowModal(true)}
@@ -62,13 +53,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Tablo */}
-      <table
-        className="
-          w-full text-sm 
-          border-collapse 
-          bg-white
-        "
-      >
+      <table className="w-full text-sm border-collapse bg-white">
         <thead>
           <tr className="text-left text-gray-500">
             <th className="px-4 py-2 w-8 font-normal"></th>
@@ -117,7 +102,7 @@ export default function ProjectsPage() {
         </tbody>
       </table>
 
-      {/* Pagination */}
+      {/* Pagination örneği */}
       <div className="mt-4 flex items-center gap-2 text-sm">
         <button className="border px-2 py-1 rounded hover:bg-gray-100">
           &lt;
@@ -128,7 +113,7 @@ export default function ProjectsPage() {
         </button>
       </div>
 
-      {/* Modal Açıldığında */}
+      {/* Yeni Proje Modalı */}
       {showModal && <NewProjectModal onClose={() => setShowModal(false)} />}
     </div>
   );

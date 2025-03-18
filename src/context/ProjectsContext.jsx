@@ -18,14 +18,37 @@ export function ProjectsProvider({ children }) {
           id: "col-1",
           title: "TO DO",
           tasks: [
-            { id: "task-1", title: "Learn React", label: "FS-1" },
-            { id: "task-2", title: "Build API", label: "FS-2" },
+            {
+              id: "task-1",
+              title: "Mobil App Öğrenimi",
+              date: "30 MAR",
+              label: "FS-2",
+              progress: "",
+            },
           ],
         },
         {
           id: "col-2",
+          title: "IN PROGRESS",
+          tasks: [
+            {
+              id: "task-2",
+              title: "Full-Stack ilk proje",
+              date: "23 MAR",
+              label: "FS-1",
+              progress: "0/4",
+            },
+          ],
+        },
+        {
+          id: "col-3",
+          title: "KONTROL EDİLSİN",
+          tasks: [],
+        },
+        {
+          id: "col-4",
           title: "DONE",
-          tasks: [{ id: "task-3", title: "Setup project", label: "FS-0" }],
+          tasks: [],
         },
       ],
     },
@@ -39,9 +62,22 @@ export function ProjectsProvider({ children }) {
       isStarred: false,
       columns: [
         {
-          id: "col-1",
+          id: "col-a",
           title: "BACKLOG",
-          tasks: [{ id: "task-10", title: "Read docs", label: "JR-1" }],
+          tasks: [
+            {
+              id: "task-10",
+              title: "Read docs",
+              date: "10 MAR",
+              label: "JR-1",
+              progress: "",
+            },
+          ],
+        },
+        {
+          id: "col-b",
+          title: "COMPLETED",
+          tasks: [],
         },
       ],
     },
