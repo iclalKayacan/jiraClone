@@ -2,11 +2,9 @@
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Column from "./Column";
-import SearchBar from "./SearchBar"; // <-- Yeni eklenen import
+import SearchBar from "./SearchBar"; 
 
-/**
- * Aynı sütunda kartların ya da sütunların sırasını değiştirir
- */
+
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -14,9 +12,7 @@ function reorder(list, startIndex, endIndex) {
   return result;
 }
 
-/**
- * Farklı sütunlar arası kart taşıma
- */
+
 function moveTask(sourceList, destList, source, destination) {
   const sourceClone = Array.from(sourceList);
   const destClone = Array.from(destList);
@@ -61,9 +57,8 @@ export default function Board() {
     { id: "col-4", title: "DONE", tasks: [] },
   ]);
 
-  /**
-   * "Create" popup'ından gelen yeni görevi ilgili sütuna ekleyen fonksiyon
-   */
+ 
+   
   const handleCreateTask = (colId, taskData) => {
     setColumns((prev) =>
       prev.map((col) => {
@@ -148,13 +143,11 @@ export default function Board() {
     }
   };
 
-  // Yukarıda ek hiçbir satır silinmedi, altta yenilik:
-  // =============== ARAMA İÇİN STATE ===============
+
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
-      {/* SearchBar'ı burada çağırıyoruz */}
       <div className="mb-4">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>

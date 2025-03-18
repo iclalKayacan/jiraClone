@@ -1,5 +1,4 @@
-"use client"; // Eğer Next.js 13+ App Router kullanıyorsanız
-
+"use client";
 import React from "react";
 import { FiSearch } from "react-icons/fi";
 
@@ -15,7 +14,6 @@ export default function SearchBar({ searchTerm, setSearchTerm }) {
                    text-sm focus:outline-none focus:border-blue-500 
                    placeholder:text-gray-400"
       />
-      {/* Sağ kenardaki arama ikonu */}
       <FiSearch
         className="absolute right-2 top-1/2 transform -translate-y-1/2 
                    text-gray-400"
