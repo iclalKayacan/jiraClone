@@ -13,19 +13,22 @@ export default function Column({ column, onCreateTask, onSelectTask }) {
 
   return (
     <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
+      {/* Üst kısım: kolon başlığı */}
       <div className="flex items-center justify-between px-3 py-2">
         <h2 className="text-xs font-bold uppercase tracking-wide text-[#5e6c84]">
           {column.title} ({column.tasks.length})
         </h2>
       </div>
 
-      <Droppable droppableId={column.id} type="TASK" isDropDisabled={false}>
+      {/* Bu kolon, kartları "bırakma" alanı (Droppable) */}
+      <Droppable droppableId={column.id} type="TASK">
         {(provided) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
             className="p-2 flex flex-col gap-2 min-h-[50px]"
           >
+            {/* Her task için Draggable */}
             {column.tasks.map((task, index) => (
               <Draggable draggableId={task.id} index={index} key={task.id}>
                 {(providedDrag, snapshot) => (
@@ -69,12 +72,13 @@ export default function Column({ column, onCreateTask, onSelectTask }) {
                 )}
               </Draggable>
             ))}
+
             {provided.placeholder}
           </div>
         )}
       </Droppable>
 
-      {/* +Create butonu */}
+      {/* +Create butonu ve açılır popup */}
       <div className="px-3 pb-3">
         <button
           onClick={() => setShowPopup((prev) => !prev)}

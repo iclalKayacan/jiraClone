@@ -4,7 +4,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Column from "./Column";
 import SearchBar from "./SearchBar";
 
-// Liste içi sıralama fonksiyonu
+// -- reorder ve moveTask fonksiyonları (same as before) --
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -12,29 +12,24 @@ function reorder(list, startIndex, endIndex) {
   return result;
 }
 
-// Kolonlar arası taşıma fonksiyonu
 function moveTask(sourceList, destList, source, destination) {
   const sourceClone = Array.from(sourceList);
   const destClone = Array.from(destList);
   const [removed] = sourceClone.splice(source.index, 1);
   destClone.splice(destination.index, 0, removed);
 
-  return {
-    newSource: sourceClone,
-    newDest: destClone,
-  };
+  return { newSource: sourceClone, newDest: destClone };
 }
 
 export default function Board({ project }) {
-  // Eğer project prop'u gelmezse kontrol
   if (!project) {
     return <div className="p-4">No project data</div>;
   }
 
-  // Projedeki columns'u state olarak tutuyoruz:
   const [columns, setColumns] = useState(project.columns || []);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Yeni task oluşturma fonksiyonu
+  // Yeni task oluşturma
   const handleCreateTask = (colId, taskData) => {
     setColumns((prev) =>
       prev.map((col) => {
@@ -55,49 +50,43 @@ export default function Board({ project }) {
     );
   };
 
-  // Sürükle-bırak sonrası çalışacak fonksiyon
+  // Sürükle-bırak
   const onDragEnd = (result) => {
     const { source, destination, type } = result;
-
-    // destination yoksa iptal
     if (!destination) return;
 
-    // SÜTUN sürükleniyorsa
+    // Kolon sürükleniyorsa:
     if (type === "COLUMN") {
       const newCols = reorder(columns, source.index, destination.index);
       setColumns(newCols);
       return;
     }
 
-    // KART sürükleniyorsa
+    // Kart sürükleniyorsa:
     if (source.droppableId === destination.droppableId) {
-      // Aynı sütunda sıralamayı değiştir
-      const colIndex = columns.findIndex(
-        (col) => col.id === source.droppableId
-      );
+      // Aynı kolonda sıralama
+      const colIndex = columns.findIndex((c) => c.id === source.droppableId);
       const newColumns = Array.from(columns);
-
       const reorderedTasks = reorder(
         newColumns[colIndex].tasks,
         source.index,
         destination.index
       );
-
       newColumns[colIndex] = {
         ...newColumns[colIndex],
         tasks: reorderedTasks,
       };
       setColumns(newColumns);
     } else {
-      // Farklı sütunlar arası taşıma
+      // Farklı kolonlar arası taşıma
       const sourceColIndex = columns.findIndex(
-        (col) => col.id === source.droppableId
+        (c) => c.id === source.droppableId
       );
       const destColIndex = columns.findIndex(
-        (col) => col.id === destination.droppableId
+        (c) => c.id === destination.droppableId
       );
-
       const newColumns = Array.from(columns);
+
       const { newSource, newDest } = moveTask(
         newColumns[sourceColIndex].tasks,
         newColumns[destColIndex].tasks,
@@ -113,22 +102,26 @@ export default function Board({ project }) {
         ...newColumns[destColIndex],
         tasks: newDest,
       };
-
       setColumns(newColumns);
     }
   };
 
-  // Arama metni
-  const [searchTerm, setSearchTerm] = useState("");
+  // Filtre
+  const filteredColumns = columns.map((col) => ({
+    ...col,
+    tasks: col.tasks.filter((task) =>
+      task.title.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+  }));
 
   return (
     <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
-      {/* Arama bileşeni */}
       <div className="mb-4">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
+        {/* Kolonları yatayda sürükleyebilmek için 'type="COLUMN"' */}
         <Droppable droppableId="board" direction="horizontal" type="COLUMN">
           {(provided) => (
             <div
@@ -136,33 +129,20 @@ export default function Board({ project }) {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {columns.map((col, index) => {
-                // Arama filtresi (task.title)
-                const filteredTasks = col.tasks.filter((task) =>
-                  task.title.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                const columnWithFilteredTasks = {
-                  ...col,
-                  tasks: filteredTasks,
-                };
-
-                return (
-                  <Draggable draggableId={col.id} index={index} key={col.id}>
-                    {(providedDraggable) => (
-                      <div
-                        ref={providedDraggable.innerRef}
-                        {...providedDraggable.draggableProps}
-                        {...providedDraggable.dragHandleProps}
-                      >
-                        <Column
-                          column={columnWithFilteredTasks}
-                          onCreateTask={handleCreateTask}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })}
+              {filteredColumns.map((col, index) => (
+                <Draggable key={col.id} draggableId={col.id} index={index}>
+                  {(providedDraggable) => (
+                    <div
+                      ref={providedDraggable.innerRef}
+                      {...providedDraggable.draggableProps}
+                      {...providedDraggable.dragHandleProps}
+                      // Yukarıdaki handleProps, kolonun tamamını "tutma alanı" yapar
+                    >
+                      <Column column={col} onCreateTask={handleCreateTask} />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
               {provided.placeholder}
             </div>
           )}

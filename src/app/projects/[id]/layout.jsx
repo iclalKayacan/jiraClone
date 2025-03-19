@@ -1,8 +1,7 @@
-// app/projects/layout.jsx
 "use client";
 import SideBar from "@/components/SideBar";
 
-export default function ProjectsLayout({ children }) {
+export default function ProjectLayout({ children }) {
   return (
     <div className="flex min-h-screen">
       {/* Solda sabit menü */}
@@ -10,7 +9,7 @@ export default function ProjectsLayout({ children }) {
         <SideBar />
       </aside>
 
-      {/* Sağ taraf: ProjectNav + Board vb. */}
+      {/* Sağ taraf: Detay içeriği */}
       <main className="flex-1 flex flex-col bg-blue-50">{children}</main>
     </div>
   );
