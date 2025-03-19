@@ -9,7 +9,6 @@ export default function ProjectPage() {
   const { id } = useParams();
   const { projects } = useProjects();
 
-  // ID eşleşen projeyi bul
   const project = projects.find((p) => p.id === parseInt(id, 10));
 
   if (!project) {
@@ -17,14 +16,12 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Üstte ProjectNav (projenin adı, sekmeler vs.) */}
+    <div className="flex flex-col h-full">
+      {/* Üstte ProjectNav */}
       <ProjectNav project={project} />
 
-      {/* Altında Board bileşeni */}
-      <div className="p-4">
-        <Board project={project} />
-      </div>
+      {/* Altında Board */}
+      <Board project={project} />
     </div>
   );
 }

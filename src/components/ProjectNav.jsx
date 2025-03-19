@@ -5,8 +5,7 @@ export default function ProjectNav({ project }) {
   if (!project) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-blue-50 text-gray-700">
-      {/* Sol: Proje Adı + İkon */}
+    <div className="flex items-center justify-between px-6 py-4 bg-blue-50 text-gray-700 border-b border-gray-200">
       <div className="flex items-center gap-2">
         <img
           src={project.icon || "/cloud-icon.png"}
@@ -17,7 +16,7 @@ export default function ProjectNav({ project }) {
         <FiChevronDown className="text-gray-500" />
       </div>
 
-      {/* Ortadaki Sekmeler (isterseniz sabit kalabilir) */}
+      {/* Ortadaki Sekmeler */}
       <nav className="flex items-center gap-8 text-sm">
         <a href="#" className="hover:text-gray-900">
           Summary
@@ -28,7 +27,25 @@ export default function ProjectNav({ project }) {
         <a href="#" className="hover:text-gray-900">
           List
         </a>
-        {/* ...devam... */}
+        <a href="#" className="hover:text-gray-900">
+          Calendar
+        </a>
+        <a href="#" className="hover:text-gray-900">
+          Timeline
+        </a>
+       
+        <a href="#" className="hover:text-gray-900 hidden md:inline-block">
+          Pages
+        </a>
+        <a href="#" className="hover:text-gray-900 hidden md:inline-block">
+          Attachments
+        </a>
+        <a href="#" className="hover:text-gray-900 hidden lg:inline-block">
+          Issues
+        </a>
+        <a href="#" className="hover:text-gray-900 hidden lg:inline-block">
+          Reports
+        </a>
       </nav>
 
       {/* Sağdaki Menü */}
