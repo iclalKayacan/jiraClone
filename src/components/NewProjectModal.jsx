@@ -1,17 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { FiX } from "react-icons/fi";
 import { useProjects } from "@/context/ProjectsContext";
 
 export default function NewProjectModal({ onClose }) {
   const { addProject } = useProjects();
-
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [type, setType] = useState("Team-managed business");
   const [lead, setLead] = useState("");
 
-  // Form Submit
   const handleSubmit = (e) => {
     e.preventDefault();
     const newProj = {
@@ -22,6 +19,7 @@ export default function NewProjectModal({ onClose }) {
       lead,
       icon: "/cloud-icon.png",
       isStarred: false,
+      columns: [],
     };
     addProject(newProj);
     onClose();
@@ -29,67 +27,40 @@ export default function NewProjectModal({ onClose }) {
 
   return (
     <>
-      {/* Arka plan - blur + yarı saydam */}
-      <div
-        className="fixed inset-0 z-40 bg-white/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
+      {/* Arkaplan */}
+      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
       {/* Modal kutusu */}
       <div
         className="fixed top-1/2 left-1/2 z-50 w-full max-w-md 
-                      -translate-x-1/2 -translate-y-1/2
-                      bg-white rounded-md shadow-lg p-6"
+                   -translate-x-1/2 -translate-y-1/2
+                   bg-white p-6 rounded shadow-md"
       >
-        {/* Üst kısım: Başlık, kapatma ikonu */}
-        <div className="flex justify-between items-start mb-4">
-          <h2 className="text-xl font-bold text-gray-800">
-            Create New Project
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-800"
-          >
-            <FiX size={20} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <h2 className="text-xl font-bold mb-4">Create New Project</h2>
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-1">
               Project Name
             </label>
             <input
-              type="text"
-              className="border w-full px-3 py-2 rounded 
-                         focus:outline-none focus:border-blue-500 text-sm"
+              className="border w-full px-2 py-1 rounded"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Key
-            </label>
+            <label className="block text-sm font-medium mb-1">Key</label>
             <input
-              type="text"
-              className="border w-full px-3 py-2 rounded 
-                         focus:outline-none focus:border-blue-500 text-sm"
+              className="border w-full px-2 py-1 rounded"
               value={key}
               onChange={(e) => setKey(e.target.value)}
               required
             />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Type
-            </label>
+            <label className="block text-sm font-medium mb-1">Type</label>
             <select
-              className="border w-full px-3 py-2 rounded 
-                         focus:outline-none focus:border-blue-500 text-sm"
+              className="border w-full px-2 py-1 rounded"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -101,33 +72,25 @@ export default function NewProjectModal({ onClose }) {
               </option>
             </select>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lead
-            </label>
+            <label className="block text-sm font-medium mb-1">Lead</label>
             <input
-              type="text"
-              className="border w-full px-3 py-2 rounded 
-                         focus:outline-none focus:border-blue-500 text-sm"
+              className="border w-full px-2 py-1 rounded"
               value={lead}
               onChange={(e) => setLead(e.target.value)}
             />
           </div>
-
-          {/* Butonlar */}
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="border border-gray-300 px-4 py-2 text-sm rounded hover:bg-gray-100"
+              className="border px-4 py-1 rounded"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 text-sm rounded 
-                         hover:bg-blue-700"
+              className="bg-blue-600 text-white px-4 py-1 rounded"
             >
               Create
             </button>

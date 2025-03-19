@@ -5,7 +5,7 @@ import TopNav from "@/components/TopNav";
 
 export const metadata = {
   title: "My App",
-  description: "Demo",
+  description: "...",
 };
 
 export default function RootLayout({ children }) {

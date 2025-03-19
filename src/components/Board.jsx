@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Column from "./Column";
-import SearchBar from "./SearchBar"; 
+import SearchBar from "./SearchBar";
 
-
+// Liste içi sıralama fonksiyonu
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -12,7 +12,7 @@ function reorder(list, startIndex, endIndex) {
   return result;
 }
 
-
+// Kolonlar arası taşıma fonksiyonu
 function moveTask(sourceList, destList, source, destination) {
   const sourceClone = Array.from(sourceList);
   const destClone = Array.from(destList);
@@ -25,40 +25,16 @@ function moveTask(sourceList, destList, source, destination) {
   };
 }
 
-export default function Board() {
-  const [columns, setColumns] = useState([
-    {
-      id: "col-1",
-      title: "TO DO",
-      tasks: [
-        {
-          id: "task-1",
-          title: "Mobil App Öğrenimi",
-          date: "30 MAR",
-          label: "FS-2",
-          progress: "",
-        },
-      ],
-    },
-    {
-      id: "col-2",
-      title: "IN PROGRESS",
-      tasks: [
-        {
-          id: "task-2",
-          title: "Full-Stack ilk proje",
-          date: "23 MAR",
-          label: "FS-1",
-          progress: "0/4",
-        },
-      ],
-    },
-    { id: "col-3", title: "KONTROL EDİLSİN", tasks: [] },
-    { id: "col-4", title: "DONE", tasks: [] },
-  ]);
+export default function Board({ project }) {
+  // Eğer project prop'u gelmezse kontrol
+  if (!project) {
+    return <div className="p-4">No project data</div>;
+  }
 
- 
-   
+  // Projedeki columns'u state olarak tutuyoruz:
+  const [columns, setColumns] = useState(project.columns || []);
+
+  // Yeni task oluşturma fonksiyonu
   const handleCreateTask = (colId, taskData) => {
     setColumns((prev) =>
       prev.map((col) => {
@@ -79,25 +55,23 @@ export default function Board() {
     );
   };
 
-  /**
-   * Kartlar veya sütunlar sürüklenip bırakıldığında çağrılır
-   */
+  // Sürükle-bırak sonrası çalışacak fonksiyon
   const onDragEnd = (result) => {
     const { source, destination, type } = result;
 
-    // destination yoksa (ör. sürükleme alan dışına bırakıldıysa) iptal
+    // destination yoksa iptal
     if (!destination) return;
 
-    // 1) Sütunları (COLUMN) sürüklediysek
+    // SÜTUN sürükleniyorsa
     if (type === "COLUMN") {
       const newCols = reorder(columns, source.index, destination.index);
       setColumns(newCols);
       return;
     }
 
-    // 2) Kartları (TASK) sürüklediysek
+    // KART sürükleniyorsa
     if (source.droppableId === destination.droppableId) {
-      // Aynı sütun içinde sıralamayı değiştir
+      // Aynı sütunda sıralamayı değiştir
       const colIndex = columns.findIndex(
         (col) => col.id === source.droppableId
       );
@@ -108,13 +82,14 @@ export default function Board() {
         source.index,
         destination.index
       );
+
       newColumns[colIndex] = {
         ...newColumns[colIndex],
         tasks: reorderedTasks,
       };
       setColumns(newColumns);
     } else {
-      // Farklı sütunlar arası kart taşıma
+      // Farklı sütunlar arası taşıma
       const sourceColIndex = columns.findIndex(
         (col) => col.id === source.droppableId
       );
@@ -143,11 +118,12 @@ export default function Board() {
     }
   };
 
-
+  // Arama metni
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
+      {/* Arama bileşeni */}
       <div className="mb-4">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
@@ -161,7 +137,7 @@ export default function Board() {
               {...provided.droppableProps}
             >
               {columns.map((col, index) => {
-                // Filtreleme: aranan kelimeyi task.title içinde arar
+                // Arama filtresi (task.title)
                 const filteredTasks = col.tasks.filter((task) =>
                   task.title.toLowerCase().includes(searchTerm.toLowerCase())
                 );
