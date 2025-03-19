@@ -1,21 +1,23 @@
 // components/ProjectNav.js
 import { FiChevronDown } from "react-icons/fi";
 
-export default function ProjectNav() {
+export default function ProjectNav({ project }) {
+  if (!project) return null;
+
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-blue-50 text-gray-700">
       {/* Sol: Proje Adı + İkon */}
       <div className="flex items-center gap-2">
         <img
-          src="/cloud-icon.png"
-          alt="Cloud Icon"
+          src={project.icon || "/cloud-icon.png"}
+          alt="Project Icon"
           className="w-6 h-6 object-contain"
         />
-        <h1 className="text-xl font-semibold">Full-Stack</h1>
+        <h1 className="text-xl font-semibold">{project.name}</h1>
         <FiChevronDown className="text-gray-500" />
       </div>
 
-      {/* Ortadaki Sekmeler */}
+      {/* Ortadaki Sekmeler (isterseniz sabit kalabilir) */}
       <nav className="flex items-center gap-8 text-sm">
         <a href="#" className="hover:text-gray-900">
           Summary
@@ -26,30 +28,7 @@ export default function ProjectNav() {
         <a href="#" className="hover:text-gray-900">
           List
         </a>
-        <a href="#" className="hover:text-gray-900">
-          Calendar
-        </a>
-        <a href="#" className="hover:text-gray-900">
-          Timeline
-        </a>
-        <a href="#" className="hover:text-gray-900 hidden md:inline-block">
-          Approvals
-        </a>
-        <a href="#" className="hover:text-gray-900 hidden md:inline-block">
-          Forms
-        </a>
-        <a href="#" className="hover:text-gray-900 hidden md:inline-block">
-          Pages
-        </a>
-        <a href="#" className="hover:text-gray-900 hidden md:inline-block">
-          Attachments
-        </a>
-        <a href="#" className="hover:text-gray-900 hidden lg:inline-block">
-          Issues
-        </a>
-        <a href="#" className="hover:text-gray-900 hidden lg:inline-block">
-          Reports
-        </a>
+        {/* ...devam... */}
       </nav>
 
       {/* Sağdaki Menü */}
