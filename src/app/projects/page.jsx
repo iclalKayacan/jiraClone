@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import { useProjects } from "@/context/ProjectsContext";
 import SearchBar from "@/components/SearchBar";
 import NewProjectModal from "@/components/NewProjectModal";
+import Link from "next/link";
 
 export default function ProjectsPage() {
-  const { projects } = useProjects(); // 2 projeyi de okuyor
+  const { projects } = useProjects(); 
   const [searchText, setSearchText] = useState("");
   const [productFilter, setProductFilter] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -84,12 +85,12 @@ export default function ProjectsPage() {
                     alt="proj icon"
                     className="w-5 h-5 object-contain"
                   />
-                  <a
-                    href={`/projects/${proj.id}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {proj.name}
-                  </a>
+                  {/* Düzeltme 2: Projeye giderken Link kullan ve ID sayısal olsun */}
+                  <Link href={`/projects/${proj.id}`}>
+                    <span className="text-blue-600 hover:underline">
+                      {proj.name}
+                    </span>
+                  </Link>
                 </div>
               </td>
               <td className="px-4 py-3">{proj.key}</td>

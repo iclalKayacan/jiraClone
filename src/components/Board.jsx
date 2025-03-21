@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Column from "./Column";
 import SearchBar from "./SearchBar";
+import TaskDetailModal from "./TaskDetailModal";
 
-// -- reorder ve moveTask fonksiyonları (same as before) --
+// *** Yardımcı fonksiyonlar *** //
 function reorder(list, startIndex, endIndex) {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -22,24 +23,37 @@ function moveTask(sourceList, destList, source, destination) {
 }
 
 export default function Board({ project }) {
+  // 1) Eğer project gelmezse
   if (!project) {
     return <div className="p-4">No project data</div>;
   }
 
-  const [columns, setColumns] = useState(project.columns || []);
-  const [searchTerm, setSearchTerm] = useState("");
+  // 2) İlk render’da columns state’ini project.columns’dan başlatıyoruz
+  //    Sonraki render’larda tekrar başlatmıyoruz:
+  const [columns, setColumns] = useState(() => project.columns || []);
 
-  // Yeni task oluşturma
-  const handleCreateTask = (colId, taskData) => {
-    setColumns((prev) =>
-      prev.map((col) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  // 3) Bir kolondaki göreve tıklayınca, detay modalında gösterebilmek için state tutuyoruz
+  function handleSelectTask(task) {
+    setSelectedTask(task);
+  }
+
+  // 4) Yeni task oluşturma (ilgili kolona push)
+  function handleCreateTask(colId, taskData) {
+    setColumns((prevCols) =>
+      prevCols.map((col) => {
         if (col.id === colId) {
           return {
             ...col,
             tasks: [
               ...col.tasks,
               {
-                id: "task-" + Date.now(),
+                // task id için unique bir değer üretip sabit kalmasına dikkat edin
+                // Geçici olarak Date.now() + random kullanalım
+                id:
+                  "task-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
                 ...taskData,
               },
             ],
@@ -48,65 +62,76 @@ export default function Board({ project }) {
         return col;
       })
     );
-  };
+  }
 
-  // Sürükle-bırak
-  const onDragEnd = (result) => {
+  // 5) DragDropContext onDragEnd
+  function onDragEnd(result) {
     const { source, destination, type } = result;
+
+    // Hedef yoksa (örneğin sürükleme board dışına bırakıldıysa)
     if (!destination) return;
 
-    // Kolon sürükleniyorsa:
+    // --- KOLON SÜRÜKLENİYORSA --- //
     if (type === "COLUMN") {
-      const newCols = reorder(columns, source.index, destination.index);
-      setColumns(newCols);
+      setColumns((prevCols) => {
+        const newCols = reorder(prevCols, source.index, destination.index);
+        return newCols;
+      });
       return;
     }
 
-    // Kart sürükleniyorsa:
+    // --- KART (TASK) SÜRÜKLENİYORSA --- //
+    // Aynı kolon içinde sıralama değişiyorsa
     if (source.droppableId === destination.droppableId) {
-      // Aynı kolonda sıralama
-      const colIndex = columns.findIndex((c) => c.id === source.droppableId);
-      const newColumns = Array.from(columns);
-      const reorderedTasks = reorder(
-        newColumns[colIndex].tasks,
-        source.index,
-        destination.index
-      );
-      newColumns[colIndex] = {
-        ...newColumns[colIndex],
-        tasks: reorderedTasks,
-      };
-      setColumns(newColumns);
+      setColumns((prevCols) => {
+        // source/dest aynı kolonsa reorder
+        const colIndex = prevCols.findIndex((c) => c.id === source.droppableId);
+        if (colIndex === -1) return prevCols;
+
+        const newCols = Array.from(prevCols);
+        const reorderedTasks = reorder(
+          newCols[colIndex].tasks,
+          source.index,
+          destination.index
+        );
+        newCols[colIndex] = {
+          ...newCols[colIndex],
+          tasks: reorderedTasks,
+        };
+        return newCols;
+      });
     } else {
       // Farklı kolonlar arası taşıma
-      const sourceColIndex = columns.findIndex(
-        (c) => c.id === source.droppableId
-      );
-      const destColIndex = columns.findIndex(
-        (c) => c.id === destination.droppableId
-      );
-      const newColumns = Array.from(columns);
+      setColumns((prevCols) => {
+        const sourceColIndex = prevCols.findIndex(
+          (c) => c.id === source.droppableId
+        );
+        const destColIndex = prevCols.findIndex(
+          (c) => c.id === destination.droppableId
+        );
+        if (sourceColIndex === -1 || destColIndex === -1) return prevCols;
 
-      const { newSource, newDest } = moveTask(
-        newColumns[sourceColIndex].tasks,
-        newColumns[destColIndex].tasks,
-        source,
-        destination
-      );
-
-      newColumns[sourceColIndex] = {
-        ...newColumns[sourceColIndex],
-        tasks: newSource,
-      };
-      newColumns[destColIndex] = {
-        ...newColumns[destColIndex],
-        tasks: newDest,
-      };
-      setColumns(newColumns);
+        const newCols = Array.from(prevCols);
+        const { newSource, newDest } = moveTask(
+          newCols[sourceColIndex].tasks,
+          newCols[destColIndex].tasks,
+          source,
+          destination
+        );
+        newCols[sourceColIndex] = {
+          ...newCols[sourceColIndex],
+          tasks: newSource,
+        };
+        newCols[destColIndex] = {
+          ...newCols[destColIndex],
+          tasks: newDest,
+        };
+        return newCols;
+      });
     }
-  };
+  }
 
-  // Filtre
+  // 6) Arama filtreniz (task title bazında)
   const filteredColumns = columns.map((col) => ({
     ...col,
     tasks: col.tasks.filter((task) =>
@@ -114,14 +139,16 @@ export default function Board({ project }) {
     ),
   }));
 
+  // *** Render ***
   return (
     <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
+      {/* Arama */}
       <div className="mb-4">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
 
+      {/* DragDropContext - Kolonlar */}
       <DragDropContext onDragEnd={onDragEnd}>
-        {/* Kolonları yatayda sürükleyebilmek için 'type="COLUMN"' */}
         <Droppable droppableId="board" direction="horizontal" type="COLUMN">
           {(provided) => (
             <div
@@ -130,15 +157,22 @@ export default function Board({ project }) {
               {...provided.droppableProps}
             >
               {filteredColumns.map((col, index) => (
-                <Draggable key={col.id} draggableId={col.id} index={index}>
+                <Draggable
+                  key={String(col.id)} // id'yi stringe çeviriyoruz
+                  draggableId={String(col.id)}
+                  index={index}
+                >
                   {(providedDraggable) => (
                     <div
                       ref={providedDraggable.innerRef}
                       {...providedDraggable.draggableProps}
                       {...providedDraggable.dragHandleProps}
-                      // Yukarıdaki handleProps, kolonun tamamını "tutma alanı" yapar
                     >
-                      <Column column={col} onCreateTask={handleCreateTask} />
+                      <Column
+                        column={col}
+                        onCreateTask={handleCreateTask}
+                        onSelectTask={handleSelectTask}
+                      />
                     </div>
                   )}
                 </Draggable>
@@ -148,6 +182,14 @@ export default function Board({ project }) {
           )}
         </Droppable>
       </DragDropContext>
+
+      {/* Görev Detay Modalı */}
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </div>
   );
 }

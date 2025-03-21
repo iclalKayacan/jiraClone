@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const ProjectsContext = createContext();
 
@@ -42,11 +42,6 @@ export function ProjectsProvider({ children }) {
         },
         {
           id: "col-3",
-          title: "KONTROL EDİLSİN",
-          tasks: [],
-        },
-        {
-          id: "col-4",
           title: "DONE",
           tasks: [],
         },
@@ -61,29 +56,28 @@ export function ProjectsProvider({ children }) {
       icon: "/clock-icon.png",
       isStarred: false,
       columns: [
-        {
-          id: "col-a",
-          title: "BACKLOG",
-          tasks: [
-            {
-              id: "task-10",
-              title: "Read docs",
-              date: "10 MAR",
-              label: "JR-1",
-              progress: "",
-            },
-          ],
-        },
+        
         {
           id: "col-b",
-          title: "COMPLETED",
+          title: "DONE",
           tasks: [],
         },
       ],
     },
   ]);
 
+  const defaultColumns = [
+    { id: "col-1", title: "TO DO", tasks: [] },
+    { id: "col-2", title: "IN PROGRESS", tasks: [] },
+    { id: "col-3", title: "DONE", tasks: [] },
+  ];
+
+  // Yeni proje ekleme
   const addProject = (newProj) => {
+    // Eğer columns boş veya tanımsızsa varsayılan kolonları ekle:
+    if (!newProj.columns || newProj.columns.length === 0) {
+      newProj.columns = defaultColumns;
+    }
     setProjects((prev) => [...prev, newProj]);
   };
 

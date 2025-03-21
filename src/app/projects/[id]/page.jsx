@@ -1,16 +1,19 @@
 "use client";
+import ProjectNav from "@/components/ProjectNav";
+import React from "react";
 import { useParams } from "next/navigation";
 import { useProjects } from "@/context/ProjectsContext";
-import ProjectNav from "@/components/ProjectNav";
-import Board from "@/components/Board";
+import Board from "@/components/Board"; // Board bileşeninin yolu
 
 export default function ProjectDetailPage() {
-  const { id } = useParams();
+  const params = useParams();
   const { projects } = useProjects();
 
-  const project = projects.find((p) => p.id === parseInt(id, 10));
+  // URL'deki id'yi alıp ilgili projeyi bulalım:
+  const project = projects.find((p) => p.id === Number(params.id));
+
   if (!project) {
-    return <div className="p-4">Project not found</div>;
+    return <div className="p-4">Proje bulunamadı!</div>;
   }
 
   return (

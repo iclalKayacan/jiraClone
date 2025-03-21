@@ -1,43 +1,48 @@
 "use client";
-
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // App Router
+import { useRouter } from "next/navigation";
 import { useProjects } from "@/context/ProjectsContext";
 
 export default function NewProjectPage() {
   const router = useRouter();
-  const { addProject } = useProjects(); // context'den fonksiyon
+  const { addProject } = useProjects();
 
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [type, setType] = useState("Team-managed business");
   const [lead, setLead] = useState("");
 
-  // Form submit
+  // Proje oluştur
   const handleCreate = (e) => {
     e.preventDefault();
-
-    // Basit ID üretimi (timestamp)
     const newId = Date.now();
 
+    // columns'i hiç tanımlamazsanız, context'te defaultColumns ekleyecek.
+    // Ama isterseniz aşağıya columns: [ { id:..., title:...}, ... ] şeklinde
+    // de ekleyebilirsiniz.
     const newProj = {
       id: newId,
       name,
       key,
       type,
       lead,
-      icon: "/cloud-icon.png", // default icon
+      icon: "/cloud-icon.png",
       isStarred: false,
+      // columns: [] // Boş geçebilirsiniz veya context'e bırakırsınız
+      // columns: [
+      //   { id: "col-1", title: "TO DO", tasks: [] },
+      //   { id: "col-2", title: "IN PROGRESS", tasks: [] },
+      //   { id: "col-3", title: "DONE", tasks: [] },
+      // ],
     };
 
-    addProject(newProj); // context -> projects'e ekle
-    router.push("/projects"); // listeye dön
+    addProject(newProj);
+    router.push(`/projects/${newId}`);
   };
 
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">Create New Project</h1>
-
       <form onSubmit={handleCreate} className="max-w-md space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">
