@@ -3,7 +3,11 @@ import ProjectNav from "@/components/ProjectNav";
 import React from "react";
 import { useParams } from "next/navigation";
 import { useProjects } from "@/context/ProjectsContext";
-import Board from "@/components/Board"; // Board bileşeninin yolu
+import dynamic from "next/dynamic";
+
+const Board = dynamic(() => import("@/components/Board"), {
+  ssr: false, // Board bileşenini sadece client tarafında render et
+});
 
 export default function ProjectDetailPage() {
   const params = useParams();

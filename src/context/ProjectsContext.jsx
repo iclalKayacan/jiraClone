@@ -72,9 +72,7 @@ export function ProjectsProvider({ children }) {
     { id: "col-3", title: "DONE", tasks: [] },
   ];
 
-  // Yeni proje ekleme
   const addProject = (newProj) => {
-    // Eğer columns boş veya tanımsızsa varsayılan kolonları ekle:
     if (!newProj.columns || newProj.columns.length === 0) {
       newProj.columns = defaultColumns;
     }
