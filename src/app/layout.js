@@ -1,21 +1,22 @@
-// app/layout.js
+// src/app/layout.js
+"use client";
+
 import "./globals.css";
 import { ProjectsProvider } from "@/context/ProjectsContext";
 import TopNav from "@/components/TopNav";
-
-export const metadata = {
-  title: "My App",
-  description: "...",
-};
+import { Provider } from "react-redux";
+import { store } from "@/store/store";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <ProjectsProvider>
-          <TopNav />
-          {children}
-        </ProjectsProvider>
+        <Provider store={store}>
+          <ProjectsProvider>
+            <TopNav />
+            {children}
+          </ProjectsProvider>
+        </Provider>
       </body>
     </html>
   );

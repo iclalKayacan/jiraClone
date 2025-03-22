@@ -56,7 +56,6 @@ export function ProjectsProvider({ children }) {
       icon: "/clock-icon.png",
       isStarred: false,
       columns: [
-        
         {
           id: "col-b",
           title: "DONE",

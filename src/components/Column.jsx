@@ -7,7 +7,6 @@ export default function Column({
   onCreateTask,
   onSelectTask,
   onUpdateTitle,
-  dragHandleProps,
 }) {
   const [showPopup, setShowPopup] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -21,7 +20,6 @@ export default function Column({
     }
   }, [isEditing]);
 
-  // Yeni görev oluşturma
   function handleCreateTask(taskData) {
     onCreateTask(column.id, taskData);
   }
@@ -54,10 +52,7 @@ export default function Column({
 
   return (
     <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
-      <div
-        className="flex items-center justify-between px-3 py-2 cursor-move"
-        {...dragHandleProps}
-      >
+      <div className="flex items-center justify-between px-3 py-2">
         {isEditing ? (
           <input
             ref={inputRef}
@@ -78,12 +73,10 @@ export default function Column({
         )}
       </div>
 
-      {/* Sıradan bir div: Artık Droppable yok */}
       <div className="p-2 flex flex-col gap-2 min-h-[50px]">
         {column.tasks.map((task) => (
           <div
             key={task.id}
-            // Göreve tıklanınca üst bileşene bildir (detay modal açmak için)
             onClick={() => onSelectTask && onSelectTask(task)}
             className="border border-gray-300 rounded p-2 bg-white hover:shadow transition-shadow cursor-pointer"
           >
@@ -112,7 +105,6 @@ export default function Column({
         ))}
       </div>
 
-      {/* Yeni Task Oluşturma Butonu */}
       <div className="px-3 pb-3">
         <button
           onClick={() => setShowPopup((prev) => !prev)}

@@ -48,15 +48,25 @@ function generateId(prefix) {
   return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export default function Board({ project }) {
-  const [columns, setColumns] = useState(() => project.columns || []);
+export default function Board({ project = { columns: [] } }) {
+  const [columns, setColumns] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddColumnModal, setShowAddColumnModal] = useState(false);
 
   useEffect(() => {
-    setColumns(project.columns || []);
+    if (project?.columns) {
+      setColumns(project.columns);
+    }
   }, [project]);
+
+  if (!project) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Loading project...</div>
+      </div>
+    );
+  }
 
   function handleCreateTask(colId, taskData) {
     setColumns((prevCols) =>

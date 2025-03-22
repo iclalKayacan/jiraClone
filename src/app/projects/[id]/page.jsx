@@ -5,15 +5,22 @@ import { useParams } from "next/navigation";
 import { useProjects } from "@/context/ProjectsContext";
 import dynamic from "next/dynamic";
 
-const Board = dynamic(() => import("@/components/Board"), {
-  ssr: false, // Board bileşenini sadece client tarafında render et
-});
+const Board = dynamic(
+  () => import("@/components/Board").then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">Loading board...</div>
+      </div>
+    ),
+  }
+);
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const { projects } = useProjects();
 
-  // URL'deki id'yi alıp ilgili projeyi bulalım:
   const project = projects.find((p) => p.id === Number(params.id));
 
   if (!project) {

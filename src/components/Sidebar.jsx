@@ -1,9 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useProjects } from "@/context/ProjectsContext";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProjects } from "@/store/projects/projectApi";
 
 export default function SideBar() {
-  const { projects } = useProjects();
+  const dispatch = useDispatch();
+  const { items: projects } = useSelector((state) => state.projects);
+
+  useEffect(() => {
+    dispatch(fetchProjects());
+  }, [dispatch]);
 
   return (
     <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
@@ -12,7 +19,7 @@ export default function SideBar() {
       </div>
 
       <nav className="flex-1 py-2">
-        {projects.map((proj) => (
+        {projects?.map((proj) => (
           <Link
             key={proj.id}
             href={`/projects/${proj.id}`}
