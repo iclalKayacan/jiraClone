@@ -6,7 +6,7 @@ import { fetchProjects } from "@/store/projects/projectApi";
 
 export default function SideBar() {
   const dispatch = useDispatch();
-  const { items: projects } = useSelector((state) => state.projects);
+  const { list: projects } = useSelector((state) => state.projects); // ✅ burası düzeltildi
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -26,7 +26,7 @@ export default function SideBar() {
             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
             <img
-              src={proj.icon}
+              src={proj.icon || "/cloud-icon.png"} // fallback ekledim
               alt="Project Icon"
               className="w-5 h-5 object-contain"
             />

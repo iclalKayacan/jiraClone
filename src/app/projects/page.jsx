@@ -38,7 +38,7 @@ export default function ProjectPage() {
   if (error) return <p className="p-4 text-red-500">Hata: {error}</p>;
 
   return (
-    <div className="p-8 min-h-screen bg-[#f4f5f7]">
+    <div className="p-8 min-h-screen ]">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Projects</h1>
