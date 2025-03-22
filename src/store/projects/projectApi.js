@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const BASE_URL = "https://localhost:44337/api/projects"; 
+const BASE_URL = "https://localhost:44337/api/projects";
 
 export const fetchProjects = createAsyncThunk(
   "projects/fetchProjects",

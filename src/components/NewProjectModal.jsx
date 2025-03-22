@@ -1,35 +1,40 @@
 "use client";
-import React, { useState } from "react";
-import { useProjects } from "@/context/ProjectsContext";
+
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { createProject } from "@/store/projects/projectApi";
 
 export default function NewProjectModal({ onClose }) {
-  const { addProject } = useProjects();
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [type, setType] = useState("Team-managed business");
   const [lead, setLead] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newProj = {
-      id: Date.now(),
+
+    const newProject = {
       name,
       key,
       type,
       lead,
-      icon: "/cloud-icon.png",
-      isStarred: false,
-      columns: [],
     };
-    addProject(newProj);
-    onClose();
+
+    try {
+      await dispatch(createProject(newProject)).unwrap();
+      onClose();
+    } catch (err) {
+      alert("Proje oluşturulamadı! 😢");
+      console.error(err);
+    }
   };
 
   return (
     <>
-      {/* Arkaplan */}
+      {/* Background */}
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      {/* Modal kutusu */}
+      {/* Modal */}
       <div
         className="fixed top-1/2 left-1/2 z-50 w-full max-w-md 
                    -translate-x-1/2 -translate-y-1/2

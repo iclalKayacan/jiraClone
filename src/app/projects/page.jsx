@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "@/store/projects/projectApi";
 import { FiSearch } from "react-icons/fi";
+import NewProjectModal from "@/components/NewProjectModal";
 
 export default function ProjectPage() {
   const dispatch = useDispatch();
@@ -11,6 +12,7 @@ export default function ProjectPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -36,32 +38,39 @@ export default function ProjectPage() {
   if (error) return <p className="p-4 text-red-500">Hata: {error}</p>;
 
   return (
-    <div className="p-8  min-h-screen">
+    <div className="p-8 min-h-screen bg-[#f4f5f7]">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Projects</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-          Create Project
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition text-sm font-medium"
+        >
+          Create project
         </button>
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="relative w-64">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        {/* Search Input */}
+        <div className="relative w-56">
           <input
             type="text"
             placeholder="Search Projects"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              setCurrentPage(1); // arama sonrası sayfa sıfırlansın
+              setCurrentPage(1);
             }}
-            className="w-full border border-gray-300 rounded-md py-2 px-3 pr-10 
+            className="w-full border border-gray-300 rounded-sm py-1.5 px-3 pr-9 
                        text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-400"
           />
-          <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FiSearch className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
         </div>
 
+        {/* Filter Dropdown */}
         <select
-          className="border border-gray-300 text-sm rounded-md px-3 py-2"
+          className="border border-gray-300 text-sm rounded-sm px-2.5 py-1.5 text-gray-700 w-56"
           defaultValue=""
         >
           <option value="">Filter by product</option>
@@ -70,6 +79,7 @@ export default function ProjectPage() {
         </select>
       </div>
 
+      {/* Table */}
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-[#f4f5f7] text-gray-600 text-sm font-medium">
@@ -127,7 +137,7 @@ export default function ProjectPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-end items-center mt-4 gap-2 text-sm text-gray-600">
+      <div className="flex justify-start items-center mt-4 gap-2 text-sm text-gray-600">
         <button
           className="px-3 py-1 bg-white border rounded hover:bg-gray-100"
           onClick={() => changePage(currentPage - 1)}
@@ -156,6 +166,7 @@ export default function ProjectPage() {
           ›
         </button>
       </div>
+      {showModal && <NewProjectModal onClose={() => setShowModal(false)} />}
     </div>
   );
 }
