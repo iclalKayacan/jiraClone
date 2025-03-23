@@ -6,7 +6,7 @@ import { fetchProjects } from "@/store/projects/projectApi";
 
 export default function SideBar() {
   const dispatch = useDispatch();
-  const { list: projects } = useSelector((state) => state.projects); // ✅ burası düzeltildi
+  const { list: projects } = useSelector((state) => state.projects);
 
   useEffect(() => {
     dispatch(fetchProjects());

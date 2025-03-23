@@ -26,7 +26,6 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-
       {/* Board bileşeni */}
       <Board project={project} />
     </div>

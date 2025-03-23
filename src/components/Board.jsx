@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Column from "./Column";
 import SearchBar from "./SearchBar";
 import TaskDetailModal from "./TaskDetailModal";
+import { fetchColumns, createColumn } from "@/store/columns/columnApi";
 
 function AddColumnModal({ onClose, onCreate }) {
   const [columnName, setColumnName] = useState("");
@@ -48,89 +50,58 @@ function generateId(prefix) {
   return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export default function Board({ project = { columns: [] } }) {
-  const [columns, setColumns] = useState([]);
+export default function Board({ project }) {
+  const dispatch = useDispatch();
+  const { items: columns, status } = useSelector((state) => state.columns);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddColumnModal, setShowAddColumnModal] = useState(false);
 
   useEffect(() => {
-    if (project?.columns) {
-      setColumns(project.columns);
+    if (project?.id) {
+      dispatch(fetchColumns(project.id));
     }
-  }, [project]);
+  }, [dispatch, project?.id]);
 
-  if (!project) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Loading project...</div>
-      </div>
-    );
-  }
+  // Sadece bu projeye ait kolonları filtrele
+  const projectColumns = columns.filter((col) => col.projectId === project.id);
 
-  function handleCreateTask(colId, taskData) {
-    setColumns((prevCols) =>
-      prevCols.map((col) =>
-        col.id === colId
-          ? {
-              ...col,
-              tasks: [...col.tasks, { id: generateId("task"), ...taskData }],
-            }
-          : col
-      )
-    );
-  }
-
-  function handleCreateColumn(newColumnName) {
-    setColumns((prevCols) => [
-      ...prevCols,
-      { id: generateId("col"), title: newColumnName, tasks: [] },
-    ]);
-  }
-
-  function handleUpdateColumnTitle(columnId, newTitle) {
-    setColumns((prevCols) =>
-      prevCols.map((col) =>
-        col.id === columnId
-          ? {
-              ...col,
-              title: newTitle,
-            }
-          : col
-      )
-    );
-  }
-
-  function handleDeleteColumn(columnId) {
-    setColumns((prevColumns) => 
-      prevColumns.filter((col) => col.id !== columnId)
-    );
-  }
-
-  const filteredColumns = columns.map((col) => ({
+  const filteredColumns = projectColumns.map((col) => ({
     ...col,
-    tasks: col.tasks.filter((task) =>
-      task.title.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
+    tasks:
+      col.tasks?.filter((task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase())
+      ) || [],
   }));
+
+  async function handleCreateColumn(title) {
+    try {
+      await dispatch(
+        createColumn({
+          title,
+          projectId: project.id,
+          order: columns.length,
+        })
+      ).unwrap();
+      setShowAddColumnModal(false);
+    } catch (error) {
+      console.error("Kolon oluşturulamadı:", error);
+    }
+  }
+
+  if (status === "loading") {
+    return <div>Loading columns...</div>;
+  }
 
   return (
     <div className="bg-blue-50 p-4 min-h-screen overflow-auto">
-      <div className="mb-4">
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      </div>
+      <SearchBar value={searchTerm} onChange={setSearchTerm} />
 
-      <div className="flex items-start gap-4">
-        {filteredColumns.map((col) => (
-          <Column
-            key={col.id}
-            column={col}
-            onCreateTask={handleCreateTask}
-            onSelectTask={setSelectedTask}
-            onUpdateTitle={handleUpdateColumnTitle}
-            onDeleteColumn={handleDeleteColumn}
-          />
+      <div className="flex items-start gap-4 mt-4">
+        {filteredColumns.map((column) => (
+          <Column key={column.id} column={column} projectId={project.id} />
         ))}
+
         <button
           onClick={() => setShowAddColumnModal(true)}
           className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center font-bold"
@@ -139,17 +110,17 @@ export default function Board({ project = { columns: [] } }) {
         </button>
       </div>
 
-      {selectedTask && (
-        <TaskDetailModal
-          task={selectedTask}
-          onClose={() => setSelectedTask(null)}
-        />
-      )}
-
       {showAddColumnModal && (
         <AddColumnModal
           onClose={() => setShowAddColumnModal(false)}
           onCreate={handleCreateColumn}
+        />
+      )}
+
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
         />
       )}
     </div>
