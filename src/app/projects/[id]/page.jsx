@@ -1,6 +1,5 @@
 "use client";
 
-import ProjectNav from "@/components/ProjectNav";
 import React from "react";
 import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
@@ -17,7 +16,7 @@ const Board = dynamic(() => import("@/components/Board"), {
 
 export default function ProjectDetailPage() {
   const params = useParams();
-  const { list: projects } = useSelector((state) => state.projects); // 🔁 redux’tan liste alıyoruz
+  const { list: projects } = useSelector((state) => state.projects);
 
   const project = projects.find((p) => p.id === Number(params.id));
 
@@ -27,8 +26,6 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Project bilgisi ve menüleri */}
-      <ProjectNav project={project} />
 
       {/* Board bileşeni */}
       <Board project={project} />

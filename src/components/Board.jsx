@@ -101,6 +101,12 @@ export default function Board({ project = { columns: [] } }) {
     );
   }
 
+  function handleDeleteColumn(columnId) {
+    setColumns((prevColumns) => 
+      prevColumns.filter((col) => col.id !== columnId)
+    );
+  }
+
   const filteredColumns = columns.map((col) => ({
     ...col,
     tasks: col.tasks.filter((task) =>
@@ -122,6 +128,7 @@ export default function Board({ project = { columns: [] } }) {
             onCreateTask={handleCreateTask}
             onSelectTask={setSelectedTask}
             onUpdateTitle={handleUpdateColumnTitle}
+            onDeleteColumn={handleDeleteColumn}
           />
         ))}
         <button

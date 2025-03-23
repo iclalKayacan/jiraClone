@@ -5,9 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "@/store/projects/projectApi";
 import { FiSearch } from "react-icons/fi";
 import NewProjectModal from "@/components/NewProjectModal";
+import { useRouter } from "next/navigation";
 
 export default function ProjectPage() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { list, status, error } = useSelector((state) => state.projects);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +40,7 @@ export default function ProjectPage() {
   if (error) return <p className="p-4 text-red-500">Hata: {error}</p>;
 
   return (
-    <div className="p-8 min-h-screen ]">
+    <div className="p-8 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Projects</h1>
@@ -96,7 +98,7 @@ export default function ProjectPage() {
             {paginated.map((project) => (
               <tr
                 key={project.id}
-                className="hover:bg-[#f0f0f0] transition-all"
+                className="hover:bg-[#f0f0f0] transition-all cursor-pointer"
               >
                 <td className="px-6 py-4 text-gray-400 text-xl">☆</td>
                 <td className="px-6 py-4">
@@ -104,7 +106,10 @@ export default function ProjectPage() {
                     <div className="w-8 h-8 bg-purple-100 text-purple-700 font-bold flex items-center justify-center rounded-md shadow text-sm uppercase">
                       {project.name?.charAt(0)}
                     </div>
-                    <div className="text-blue-700 font-medium hover:underline cursor-pointer">
+                    <div
+                      onClick={() => router.push(`/projects/${project.id}`)}
+                      className="text-blue-700 font-medium hover:underline cursor-pointer"
+                    >
                       {project.name}
                     </div>
                   </div>
@@ -112,9 +117,7 @@ export default function ProjectPage() {
                 <td className="px-6 py-4 uppercase text-gray-500">
                   {project.key || "—"}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
-                  Team-managed business
-                </td>
+                <td className="px-6 py-4 text-gray-600">{project.type}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
                     <img
@@ -166,6 +169,8 @@ export default function ProjectPage() {
           ›
         </button>
       </div>
+
+      {/* Modal */}
       {showModal && <NewProjectModal onClose={() => setShowModal(false)} />}
     </div>
   );
