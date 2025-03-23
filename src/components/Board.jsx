@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Column from "./Column";
 import SearchBar from "./SearchBar";
 import TaskDetailModal from "./TaskDetailModal";
-import { fetchColumns, createColumn } from "@/store/columns/columnApi";
+import { fetchColumns, createColumn } from "@/store/columns/columnSlice";
 
 function AddColumnModal({ onClose, onCreate }) {
   const [columnName, setColumnName] = useState("");
@@ -46,10 +46,6 @@ function AddColumnModal({ onClose, onCreate }) {
   );
 }
 
-function generateId(prefix) {
-  return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
 export default function Board({ project }) {
   const dispatch = useDispatch();
   const { items: columns, status } = useSelector((state) => state.columns);
@@ -63,7 +59,6 @@ export default function Board({ project }) {
     }
   }, [dispatch, project?.id]);
 
-  // Sadece bu projeye ait kolonları filtrele
   const projectColumns = columns.filter((col) => col.projectId === project.id);
 
   const filteredColumns = projectColumns.map((col) => ({

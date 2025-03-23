@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import CreateTaskPopup from "./CreateTaskPopup";
 import { FiMoreHorizontal } from "react-icons/fi";
-import { updateColumn, deleteColumn } from "@/store/columns/columnApi";
-import { createTask } from "@/store/tasks/taskApi";
+import { updateColumnTitle, deleteColumn } from "@/store/columns/columnSlice";
+import { createTask } from "@/store/tasks/taskSlice";
 
 export default function Column({ column, projectId }) {
   const dispatch = useDispatch();
@@ -15,18 +15,17 @@ export default function Column({ column, projectId }) {
   const menuRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Menü dışına tıklandığında menüyü kapat
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false);
       }
-    }
-
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Düzenleme modunda input'a odaklan
   useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus();
@@ -34,45 +33,46 @@ export default function Column({ column, projectId }) {
     }
   }, [isEditing]);
 
-  async function handleCreateTask(taskData) {
+  const handleCreateTask = async (taskData) => {
     try {
       await dispatch(
         createTask({
           ...taskData,
           columnId: column.id,
-          projectId: projectId,
+          projectId,
         })
       ).unwrap();
       setShowPopup(false);
     } catch (error) {
-      console.error("Task oluşturulamadı:", error);
+      console.error("Görev oluşturulamadı:", error);
     }
-  }
+  };
 
-  async function handleTitleSubmit() {
-    if (editedTitle.trim() && editedTitle !== column.title) {
+  const handleTitleSubmit = async () => {
+    const trimmed = editedTitle.trim();
+    if (trimmed && trimmed !== column.title) {
       try {
-        await dispatch(
-          updateColumn({
+        const result = await dispatch(
+          updateColumnTitle({
             id: column.id,
-            data: {
-              ...column,
-              title: editedTitle.trim(),
-            },
+            title: trimmed,
           })
         ).unwrap();
+
+        // Başarılı güncelleme sonrası state'i güncelle
+        setEditedTitle(result.title);
       } catch (error) {
-        console.error("Kolon başlığı güncellenemedi:", error);
+        console.error("Kolon adı güncellenemedi:", error);
         setEditedTitle(column.title);
       }
     } else {
       setEditedTitle(column.title);
     }
     setIsEditing(false);
-  }
+  };
 
-  async function handleDeleteColumn() {
-    if (window.confirm("Are you sure you want to delete this column?")) {
+  const handleDeleteColumn = async () => {
+    if (window.confirm("Bu kolonu silmek istediğine emin misin?")) {
       try {
         await dispatch(deleteColumn(column.id)).unwrap();
       } catch (error) {
@@ -80,23 +80,19 @@ export default function Column({ column, projectId }) {
       }
     }
     setShowMenu(false);
-  }
+  };
 
-  function handleKeyDown(e) {
-    if (e.key === "Enter") {
-      handleTitleSubmit();
-    } else if (e.key === "Escape") {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleTitleSubmit();
+    if (e.key === "Escape") {
       setEditedTitle(column.title);
       setIsEditing(false);
     }
-  }
-
-  function handleBlur() {
-    handleTitleSubmit();
-  }
+  };
 
   return (
     <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
+      {/* Başlık */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex-1">
           {isEditing ? (
@@ -105,7 +101,7 @@ export default function Column({ column, projectId }) {
               type="text"
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
-              onBlur={handleBlur}
+              onBlur={handleTitleSubmit}
               onKeyDown={handleKeyDown}
               className="text-xs font-bold uppercase tracking-wide text-[#5e6c84] w-full border border-blue-500 rounded px-1 py-0.5"
             />
@@ -119,7 +115,7 @@ export default function Column({ column, projectId }) {
           )}
         </div>
 
-        {/* Dropdown Menu */}
+        {/* Menü butonu */}
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowMenu(!showMenu)}
@@ -152,7 +148,7 @@ export default function Column({ column, projectId }) {
         </div>
       </div>
 
-      {/* Tasks */}
+      {/* Görevler */}
       <div className="p-2 flex flex-col gap-2 min-h-[50px]">
         {(column.tasks || []).map((task) => (
           <div
@@ -177,7 +173,7 @@ export default function Column({ column, projectId }) {
         ))}
       </div>
 
-      {/* Create Task Button */}
+      {/* Görev oluşturma butonu */}
       <div className="px-3 pb-3">
         <button
           onClick={() => setShowPopup((prev) => !prev)}
