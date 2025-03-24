@@ -28,16 +28,13 @@ export const createColumn = createAsyncThunk(
 export const updateColumnTitle = createAsyncThunk(
   "columns/updateColumnTitle",
   async ({ id, title }) => {
-    // Önce mevcut kolonu al
     const currentColumn = await axios.get(`${BASE_URL}/Column/${id}`);
 
-    // Sadece başlığı güncelle, diğer özellikleri koru
     const response = await axios.put(`${BASE_URL}/Column/${id}`, {
       ...currentColumn.data,
       title: title,
     });
 
-    // Güncellenmiş kolonu döndür
     return {
       ...currentColumn.data,
       title: title,

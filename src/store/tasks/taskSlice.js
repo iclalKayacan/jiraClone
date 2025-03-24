@@ -1,5 +1,37 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { fetchTasks, createTask, updateTask, deleteTask } from "./taskApi";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+const BASE_URL = "https://localhost:44337/api/TaskItem";
+
+// GET: Tüm görevleri getir
+export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
+  const response = await axios.get(BASE_URL);
+  return response.data;
+});
+
+// POST: Yeni görev oluştur
+export const createTask = createAsyncThunk(
+  "tasks/createTask",
+  async (taskData) => {
+    const response = await axios.post(BASE_URL, taskData);
+    return response.data;
+  }
+);
+
+// PUT: Görevi güncelle (örneğin sürükle bırakta kolonId değiştir)
+export const updateTask = createAsyncThunk(
+  "tasks/updateTask",
+  async ({ id, data }) => {
+    const response = await axios.put(`${BASE_URL}/${id}`, data);
+    return response.data;
+  }
+);
+
+// DELETE: Görev sil
+export const deleteTask = createAsyncThunk("tasks/deleteTask", async (id) => {
+  await axios.delete(`${BASE_URL}/${id}`);
+  return id;
+});
 
 const taskSlice = createSlice({
   name: "tasks",
@@ -11,7 +43,6 @@ const taskSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch Tasks
       .addCase(fetchTasks.pending, (state) => {
         state.status = "loading";
       })
@@ -23,11 +54,9 @@ const taskSlice = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
-      // Create Task
       .addCase(createTask.fulfilled, (state, action) => {
         state.items.push(action.payload);
       })
-      // Update Task
       .addCase(updateTask.fulfilled, (state, action) => {
         const index = state.items.findIndex(
           (task) => task.id === action.payload.id
@@ -36,7 +65,6 @@ const taskSlice = createSlice({
           state.items[index] = action.payload;
         }
       })
-      // Delete Task
       .addCase(deleteTask.fulfilled, (state, action) => {
         state.items = state.items.filter((task) => task.id !== action.payload);
       });
