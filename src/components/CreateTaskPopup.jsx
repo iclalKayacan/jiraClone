@@ -3,50 +3,114 @@
 import React, { useState } from "react";
 
 export default function CreateTaskPopup({ onClose, onCreate }) {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("Task");
+  const [taskData, setTaskData] = useState({
+    title: "",
+    description: "",
+    label: "",
+    assignee: "",
+  });
 
-  // Form onaylandığında
-  const handleCreate = () => {
-    if (!title.trim()) return;
-    // Girdiğimiz verileri ebeveyn bileşene iletiyoruz
-    onCreate({ title, type });
-    // popup'ı kapat
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!taskData.title.trim()) return;
+
+    onCreate(taskData);
     onClose();
   };
 
-  return (
-    <div className="absolute z-20 mt-2 p-3 w-64 bg-white border border-gray-300 rounded-md shadow-lg">
-      {/* Başlık girişi */}
-      <label className="block mb-1 text-sm font-medium text-gray-700">
-        What needs to be done?
-      </label>
-      <textarea
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        rows={2}
-        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
-      />
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTaskData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-      {/* Tip seçimi */}
-      <div className="mt-2 flex items-center gap-2">
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="text-sm border border-gray-300 rounded px-2 py-1"
-        >
-          <option value="Task">Task</option>
-          <option value="Bug">Bug</option>
-          <option value="Story">Story</option>
-        </select>
-        <button
-          onClick={handleCreate}
-          className="bg-blue-600 text-white text-sm px-3 py-1 rounded disabled:bg-gray-300"
-          disabled={!title.trim()}
-        >
-          Create
+  return (
+    <div className="bg-white rounded-lg p-4 w-[400px]">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Create Task</h2>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          ✕
         </button>
       </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={taskData.title}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Task title"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={taskData.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Task description"
+              rows="3"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Label
+            </label>
+            <input
+              type="text"
+              name="label"
+              value={taskData.label}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Bug, Feature, etc."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assignee
+            </label>
+            <input
+              type="text"
+              name="assignee"
+              value={taskData.assignee}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Assign to"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+              Create Task
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }
