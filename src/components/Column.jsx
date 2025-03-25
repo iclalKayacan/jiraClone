@@ -100,9 +100,8 @@ export default function Column({ column, projectId }) {
   };
 
   return (
-    // Kolon kartı
     <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
-      {/* Kolon başlığı */}
+      {/* Başlık */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex-1">
           {isEditing ? (
@@ -157,13 +156,13 @@ export default function Column({ column, projectId }) {
         </div>
       </div>
 
-      {/* Görevler listesi */}
-      <div className="p-2 flex flex-col gap-2 min-h-[50px]">
+      {/* Görevler */}
+      <div className="p-2 flex flex-col gap-3 min-h-[50px]">
         {tasks.map((task) => (
           <div
             key={task.id}
             onClick={() => setSelectedTask(task)}
-            className="border border-gray-300 rounded p-2 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[60px] flex flex-col"
+            className="border border-gray-300 rounded p-3 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[80px] flex flex-col"
           >
             <h3 className="text-sm font-medium text-gray-800 mb-2">
               {task.title}
@@ -187,9 +186,8 @@ export default function Column({ column, projectId }) {
         ))}
       </div>
 
-      {/* "Create" butonu ve popup */}
+      {/* Görev oluşturma */}
       <div className="px-3 pb-3 relative">
-        {/* Buton görünür, popup kapalı */}
         {!showPopup && (
           <button
             onClick={() => setShowPopup(true)}
@@ -198,8 +196,6 @@ export default function Column({ column, projectId }) {
             + Create
           </button>
         )}
-
-        {/* Popup görünür, buton kapalı */}
         {showPopup && (
           <div className="absolute left-0 top-full w-full mt-1 z-10">
             <CreateTaskPopup
@@ -210,7 +206,6 @@ export default function Column({ column, projectId }) {
         )}
       </div>
 
-      {/* Görev detayı (modal) */}
       {selectedTask && (
         <TaskDetailModal
           task={selectedTask}

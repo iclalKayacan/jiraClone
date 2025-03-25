@@ -18,12 +18,26 @@ export const createTask = createAsyncThunk(
   }
 );
 
-// PUT: Görevi güncelle (örneğin sürükle bırakta kolonId değiştir)
+// PUT: Görevi tam güncelle (tüm alanlar)
 export const updateTask = createAsyncThunk(
   "tasks/updateTask",
   async ({ id, data }) => {
     const response = await axios.put(`${BASE_URL}/${id}`, data);
     return response.data;
+  }
+);
+
+// PATCH: Task açıklamasını güncelle
+export const patchTaskDescription = createAsyncThunk(
+  "tasks/patchTaskDescription",
+  async ({ id, description }) => {
+    const url = `${BASE_URL}/${id}/description`;
+
+    await axios.patch(url, JSON.stringify(description), {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return { id, description };
   }
 );
 
@@ -43,6 +57,7 @@ const taskSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // fetchTasks
       .addCase(fetchTasks.pending, (state) => {
         state.status = "loading";
       })
@@ -54,9 +69,11 @@ const taskSlice = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
+      // createTask
       .addCase(createTask.fulfilled, (state, action) => {
         state.items.push(action.payload);
       })
+      // updateTask (tam güncelleme)
       .addCase(updateTask.fulfilled, (state, action) => {
         const index = state.items.findIndex(
           (task) => task.id === action.payload.id
@@ -65,6 +82,15 @@ const taskSlice = createSlice({
           state.items[index] = action.payload;
         }
       })
+      // patchTaskDescription (sadece açıklama güncelleme)
+      .addCase(patchTaskDescription.fulfilled, (state, action) => {
+        const { id, description } = action.payload;
+        const task = state.items.find((t) => t.id === id);
+        if (task) {
+          task.description = description;
+        }
+      })
+      // deleteTask
       .addCase(deleteTask.fulfilled, (state, action) => {
         state.items = state.items.filter((task) => task.id !== action.payload);
       });
