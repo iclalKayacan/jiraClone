@@ -5,6 +5,7 @@ import Column from "./Column";
 import SearchBar from "./SearchBar";
 import TaskDetailModal from "./TaskDetailModal";
 import { fetchColumns, createColumn } from "@/store/columns/columnSlice";
+import { fetchTasks } from "@/store/tasks/taskSlice"; // ✅ Görevleri çekmek için import
 
 function AddColumnModal({ onClose, onCreate }) {
   const [columnName, setColumnName] = useState("");
@@ -49,26 +50,33 @@ function AddColumnModal({ onClose, onCreate }) {
 export default function Board({ project }) {
   const dispatch = useDispatch();
   const { items: columns, status } = useSelector((state) => state.columns);
+  const { items: tasks } = useSelector((state) => state.tasks); // ✅ Görevleri store'dan al
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddColumnModal, setShowAddColumnModal] = useState(false);
 
   useEffect(() => {
     if (project?.id) {
-      dispatch(fetchColumns(project.id));
+      dispatch(fetchColumns(project.id)); // ✅ Kolonları çek
+      dispatch(fetchTasks()); // ✅ Görevleri çek
     }
   }, [dispatch, project?.id]);
 
+  // Projeye ait kolonları filtrele
   const projectColumns = columns.filter((col) => col.projectId === project.id);
 
+  // Kolonlara görevleri ekle
   const filteredColumns = projectColumns.map((col) => ({
     ...col,
     tasks:
-      col.tasks?.filter((task) =>
-        task.title.toLowerCase().includes(searchTerm.toLowerCase())
-      ) || [],
+      tasks
+        ?.filter((task) => task.columnId === col.id)
+        .filter((task) =>
+          task.title.toLowerCase().includes(searchTerm.toLowerCase())
+        ) || [],
   }));
 
+  // Yeni kolon oluştur
   async function handleCreateColumn(title) {
     try {
       await dispatch(

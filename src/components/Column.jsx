@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import CreateTaskPopup from "./CreateTaskPopup";
+import { useDispatch, useSelector } from "react-redux";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { updateColumnTitle, deleteColumn } from "@/store/columns/columnSlice";
 import { createTask } from "@/store/tasks/taskSlice";
+import CreateTaskPopup from "./CreateTaskPopup";
 import TaskDetailModal from "./TaskDetailModal";
 
 export default function Column({ column, projectId }) {
@@ -17,6 +17,11 @@ export default function Column({ column, projectId }) {
   const menuRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Redux'tan o kolona ait görevleri çek
+  const tasks = useSelector((state) =>
+    state.tasks.items.filter((task) => task.columnId === column.id)
+  );
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -27,7 +32,6 @@ export default function Column({ column, projectId }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Düzenleme modunda input'a odaklan
   useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus();
@@ -41,11 +45,10 @@ export default function Column({ column, projectId }) {
         ...taskData,
         columnId: column.id,
         projectId,
-        date: new Date().toISOString().split("T")[0], // Bugünün tarihini ekle
-        progress: 0, // Başlangıç progress değeri
+        date: new Date().toISOString().split("T")[0],
+        progress: 0,
       };
-
-      const result = await dispatch(createTask(newTask)).unwrap();
+      await dispatch(createTask(newTask)).unwrap();
       setShowPopup(false);
     } catch (error) {
       console.error("Görev oluşturulamadı:", error);
@@ -62,8 +65,6 @@ export default function Column({ column, projectId }) {
             title: trimmed,
           })
         ).unwrap();
-
-        // Başarılı güncelleme sonrası state'i güncelle
         setEditedTitle(result.title);
       } catch (error) {
         console.error("Kolon adı güncellenemedi:", error);
@@ -94,14 +95,14 @@ export default function Column({ column, projectId }) {
     }
   };
 
-  // Task modalını kapatmak için yeni fonksiyon
   const handleCloseTaskModal = () => {
     setSelectedTask(null);
   };
 
   return (
+    // Kolon kartı
     <div className="relative w-64 bg-white border border-gray-300 rounded-md shadow-sm mr-4">
-      {/* Başlık */}
+      {/* Kolon başlığı */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex-1">
           {isEditing ? (
@@ -119,12 +120,11 @@ export default function Column({ column, projectId }) {
               onClick={() => setIsEditing(true)}
               className="text-xs font-bold uppercase tracking-wide text-[#5e6c84] cursor-pointer hover:text-blue-600"
             >
-              {column.title} ({column.tasks?.length || 0})
+              {column.title} ({tasks.length})
             </h2>
           )}
         </div>
 
-        {/* Menü butonu */}
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowMenu(!showMenu)}
@@ -157,13 +157,13 @@ export default function Column({ column, projectId }) {
         </div>
       </div>
 
-      {/* Görevler */}
+      {/* Görevler listesi */}
       <div className="p-2 flex flex-col gap-2 min-h-[50px]">
-        {(column.tasks || []).map((task) => (
+        {tasks.map((task) => (
           <div
             key={task.id}
             onClick={() => setSelectedTask(task)}
-            className="border border-gray-300 rounded p-2 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[80px] flex flex-col"
+            className="border border-gray-300 rounded p-2 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[60px] flex flex-col"
           >
             <h3 className="text-sm font-medium text-gray-800 mb-2">
               {task.title}
@@ -177,7 +177,7 @@ export default function Column({ column, projectId }) {
                   </span>
                 )}
               </div>
-              {task.progress && (
+              {task.progress > 0 && (
                 <div className="text-xs text-gray-500 mt-1.5">
                   Progress: {task.progress}%
                 </div>
@@ -187,30 +187,30 @@ export default function Column({ column, projectId }) {
         ))}
       </div>
 
-      {/* Görev oluşturma butonu ve popup */}
-      <div className="px-3 pb-3">
-        <button
-          onClick={() => setShowPopup(true)}
-          className="mt-1 text-blue-600 text-sm px-2 py-1 hover:bg-gray-100 rounded w-full text-left flex items-center gap-2"
-        >
-          <span>+</span> Create
-        </button>
+      {/* "Create" butonu ve popup */}
+      <div className="px-3 pb-3 relative">
+        {/* Buton görünür, popup kapalı */}
+        {!showPopup && (
+          <button
+            onClick={() => setShowPopup(true)}
+            className="mt-1 text-blue-600 text-sm px-2 py-1 hover:underline w-full text-left"
+          >
+            + Create
+          </button>
+        )}
 
+        {/* Popup görünür, buton kapalı */}
         {showPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div
-              className="relative bg-white rounded-lg shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <CreateTaskPopup
-                onClose={() => setShowPopup(false)}
-                onCreate={handleCreateTask}
-              />
-            </div>
+          <div className="absolute left-0 top-full w-full mt-1 z-10">
+            <CreateTaskPopup
+              onClose={() => setShowPopup(false)}
+              onCreate={handleCreateTask}
+            />
           </div>
         )}
       </div>
 
+      {/* Görev detayı (modal) */}
       {selectedTask && (
         <TaskDetailModal
           task={selectedTask}
