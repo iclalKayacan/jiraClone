@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteTask, patchTaskDescription } from "@/store/tasks/taskSlice";
+import FileUploadPreview from "../components/FileUploadPreview"; // dosya ekleme bileşeninizin yolu
 
 function TaskDescription({ initialDesc, onSave, taskId }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -75,10 +76,10 @@ function TaskDescription({ initialDesc, onSave, taskId }) {
   );
 }
 
-// Asıl Modal
 export default function TaskDetailModal({ task, onClose }) {
   const dispatch = useDispatch();
   const [desc, setDesc] = useState(task.description || "");
+  const [uploadedFilePath, setUploadedFilePath] = useState(null);
 
   const handleDelete = async () => {
     if (window.confirm("Bu görevi silmek istediğine emin misin?")) {
@@ -89,6 +90,13 @@ export default function TaskDetailModal({ task, onClose }) {
         console.error("Görev silinemedi:", error);
       }
     }
+  };
+
+  // Dosya yükleme tamamlandığında dosya yolunu state'e aktarabilirsiniz
+  const handleFileUploadComplete = (filePath) => {
+    console.log("Dosya yüklendi:", filePath);
+    setUploadedFilePath(filePath);
+    // Burada yüklenen dosyayı görevle ilişkilendirme işlemini de yapabilirsiniz
   };
 
   if (!task) return null;
@@ -115,12 +123,24 @@ export default function TaskDetailModal({ task, onClose }) {
         </div>
         <hr className="my-4" />
 
-        {/* Yalnızca açıklamayı güncelleyen bileşen */}
-        <TaskDescription
-          initialDesc={desc}
-          onSave={setDesc} // local state de güncellensin
-          taskId={task.id} // hangi task güncellenecek
-        />
+        {/* Açıklama alanı */}
+        <TaskDescription initialDesc={desc} onSave={setDesc} taskId={task.id} />
+
+        {/* Dosya yükleme alanı */}
+        <div className="my-4">
+          <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+            Attachments
+          </h3>
+          <FileUploadPreview
+            taskId={task.id}
+            onFileUploadComplete={handleFileUploadComplete}
+          />
+          {uploadedFilePath && (
+            <p className="mt-2 text-sm text-gray-600">
+              Yüklenen Dosya: {uploadedFilePath}
+            </p>
+          )}
+        </div>
 
         {/* Diğer bilgiler */}
         <div className="my-4 border-b border-gray-200 pb-2 flex flex-wrap gap-8 text-sm text-gray-700">

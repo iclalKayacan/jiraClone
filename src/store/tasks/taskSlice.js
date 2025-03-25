@@ -47,6 +47,18 @@ export const deleteTask = createAsyncThunk("tasks/deleteTask", async (id) => {
   return id;
 });
 
+// PATCH: Task kolonunu güncelle (sürükle-bırak için)
+export const updateTaskColumn = createAsyncThunk(
+  "tasks/updateTaskColumn",
+  async ({ taskId, columnId }) => {
+    const url = `${BASE_URL}/${taskId}/column`;
+    await axios.patch(url, JSON.stringify(columnId), {
+      headers: { "Content-Type": "application/json" },
+    });
+    return { taskId, columnId };
+  }
+);
+
 const taskSlice = createSlice({
   name: "tasks",
   initialState: {
@@ -93,6 +105,14 @@ const taskSlice = createSlice({
       // deleteTask
       .addCase(deleteTask.fulfilled, (state, action) => {
         state.items = state.items.filter((task) => task.id !== action.payload);
+      })
+      // updateTaskColumn
+      .addCase(updateTaskColumn.fulfilled, (state, action) => {
+        const { taskId, columnId } = action.payload;
+        const task = state.items.find((t) => t.id === taskId);
+        if (task) {
+          task.columnId = columnId;
+        }
       });
   },
 });
