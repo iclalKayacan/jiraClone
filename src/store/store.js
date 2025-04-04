@@ -1,14 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import projectsReducer from "./projects/projectSlice";
-import columnsReducer from "./columns/columnSlice";
+import projectReducer from "./projects/projectSlice";
 import taskReducer from "./tasks/taskSlice";
-
+import columnReducer from "./columns/columnSlice";
+import userReducer from "./user/userSlice";
 
 export const store = configureStore({
   reducer: {
-    projects: projectsReducer,
-    columns: columnsReducer,
+    projects: projectReducer,
     tasks: taskReducer,
-    // tasks, subtasks, users eklenecek
+    columns: columnReducer,
+    user: userReducer,
   },
 });

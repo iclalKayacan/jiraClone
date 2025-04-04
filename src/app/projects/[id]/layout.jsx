@@ -1,27 +1,52 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { fetchProjects } from "@/store/projects/projectApi";
 import SideBar from "@/components/SideBar";
 import ProjectNav from "@/components/ProjectNav";
-import { useParams } from "next/navigation";
-import { useSelector } from "react-redux";
 
 export default function ProjectLayout({ children }) {
   const params = useParams();
-  const { list: projects } = useSelector((state) => state.projects);
-  const project = projects.find((p) => p.id === Number(params.id));
+  const dispatch = useDispatch();
+  const { items: projects, status } = useSelector((state) => state.projects);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchProjects());
+    }
+  }, [dispatch, status]);
+
+  // Loading durumu için
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  // Error durumu için
+  if (status === "failed") {
+    return <div>Error loading project</div>;
+  }
+
+  // Projects array'i hazır olduğunda
+  const project = projects?.find((p) => p.id === Number(params.id));
+
+  if (!project) {
+    return <div>Project not found</div>;
+  }
 
   return (
     <div className="flex min-h-screen">
-      {/* Solda sabit menü */}
-      <aside className="w-56 bg-white border-r border-gray-200">
-        <SideBar />
-      </aside>
+      {/* Sidebar */}
+      <div className="w-64 bg-gray-100 border-r">
+        <div className="p-4">
+          <h1 className="text-xl font-semibold">{project.name}</h1>
+          {/* Diğer sidebar içeriği */}
+        </div>
+      </div>
 
-      {/* Sağ taraf */}
-      <main className="flex-1 flex flex-col bg-blue-50">
-        {project && <ProjectNav project={project} />}
-        {children}
-      </main>
+      {/* Main content */}
+      <div className="flex-1">{children}</div>
     </div>
   );
 }

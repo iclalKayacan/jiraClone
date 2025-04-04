@@ -2,11 +2,8 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { deleteTask, patchTaskDescription } from "@/store/tasks/taskSlice";
-import FileUploadPreview from "../components/FileUploadPreview"; // dosya ekleme bileşeninizin yolu
+import FileUploadPreview from "../components/FileUploadPreview";
 
-// ----------------------------------------------------------
-// 1. Basit açıklama alanı (değişiklik yok)
-// ----------------------------------------------------------
 function TaskDescription({ initialDesc, onSave, taskId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempDesc, setTempDesc] = useState(initialDesc);
@@ -78,13 +75,12 @@ function TaskDescription({ initialDesc, onSave, taskId }) {
   );
 }
 
-// ----------------------------------------------------------
-// 2. Modal bileşeni
-// ----------------------------------------------------------
 export default function TaskDetailModal({ task, onClose }) {
   const dispatch = useDispatch();
   const [desc, setDesc] = useState(task.description || "");
-  const [uploadedFilePath, setUploadedFilePath] = useState(null);
+  const [localAttachments, setLocalAttachments] = useState(
+    task.attachments || []
+  );
 
   const handleDelete = async () => {
     if (window.confirm("Bu görevi silmek istediğine emin misin?")) {
@@ -97,10 +93,10 @@ export default function TaskDetailModal({ task, onClose }) {
     }
   };
 
-  // Dosya yükleme tamamlandığında dosya yolunu state'e aktarabilirsiniz
-  const handleFileUploadComplete = (filePath) => {
-    console.log("Dosya yüklendi:", filePath);
-    setUploadedFilePath(filePath);
+  const handleFileUploadComplete = (filePaths) => {
+    console.log("Dosyalar yüklendi:", filePaths);
+    // Gelen array'i mevcut 'localAttachments' dizisine ekle
+    setLocalAttachments((prev) => [...prev, ...filePaths]);
   };
 
   if (!task) return null;
@@ -129,10 +125,8 @@ export default function TaskDetailModal({ task, onClose }) {
 
         <hr className="my-4" />
 
-        {/* Açıklama alanı */}
         <TaskDescription initialDesc={desc} onSave={setDesc} taskId={task.id} />
 
-        {/* Dosya yükleme alanı */}
         <div className="my-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
@@ -146,109 +140,114 @@ export default function TaskDetailModal({ task, onClose }) {
             </div>
           </div>
 
-          {/* Yüklenen dosyaların listesi */}
-          <div className="grid grid-cols-2 gap-4">
-            {(uploadedFilePath || task.attachment) && (
-              <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                {/* Dosya önizleme */}
-                <div className="aspect-video bg-gray-50">
-                  {isImageFile(uploadedFilePath || task.attachment) ? (
-                    <img
-                      src={uploadedFilePath || task.attachment}
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-                    />
-                  ) : isPdfFile(uploadedFilePath || task.attachment) ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <embed
-                        src={uploadedFilePath || task.attachment}
-                        type="application/pdf"
-                        className="w-full h-full"
+          <div className="grid grid-cols-3 gap-3">
+            {localAttachments.length > 0 ? (
+              localAttachments.map((attachment, index) => (
+                <div
+                  key={index}
+                  className="border rounded-md overflow-hidden hover:shadow-sm transition-shadow"
+                >
+                  <div className="h-32 bg-gray-50">
+                    {isImageFile(attachment) ? (
+                      <img
+                        src={attachment}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
                       />
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <svg
-                        className="w-16 h-16"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ) : isPdfFile(attachment) ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <embed
+                          src={attachment}
+                          type="application/pdf"
+                          className="w-full h-full"
                         />
-                      </svg>
-                    </div>
-                  )}
-                </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg
+                          className="w-10 h-10"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Dosya bilgileri */}
-                <div className="p-3 bg-white">
-                  <div className="flex items-center justify-between">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {getFileName(uploadedFilePath || task.attachment)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Added {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 ml-2">
-                      <a
-                        href={uploadedFilePath || task.attachment}
-                        download
-                        className="p-1.5 hover:bg-gray-100 rounded-full"
-                        title="Download"
-                      >
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                  <div className="p-2 bg-white">
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-gray-900 truncate">
+                          {getFileName(attachment)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date().toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 ml-1">
+                        <a
+                          href={attachment}
+                          download
+                          className="p-1 hover:bg-gray-100 rounded"
+                          title="Download"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                          />
-                        </svg>
-                      </a>
-                      <button
-                        className="p-1.5 hover:bg-gray-100 rounded-full"
-                        title="Remove"
-                      >
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          <svg
+                            className="w-3.5 h-3.5 text-gray-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                          </svg>
+                        </a>
+                        <button
+                          onClick={() => {
+                            setLocalAttachments((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
+                          }}
+                          className="p-1 hover:bg-gray-100 rounded"
+                          title="Remove"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-3.5 h-3.5 text-gray-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {!uploadedFilePath && !task.attachment && (
-              <div className="text-sm text-gray-500 italic p-4 border rounded-lg">
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 italic p-3 border rounded-lg col-span-3">
                 No attachments yet
               </div>
             )}
           </div>
         </div>
 
-        {/* Diğer bilgiler */}
         <div className="my-4 border-b border-gray-200 pb-2 flex flex-wrap gap-8 text-sm text-gray-700">
           <div>
             <strong>Assignee:</strong>{" "}
@@ -303,60 +302,6 @@ export default function TaskDetailModal({ task, onClose }) {
   );
 }
 
-// ----------------------------------------------------------
-// 3. Ek: AttachmentPreview bileşeni
-// ----------------------------------------------------------
-function AttachmentPreview({ filePath }) {
-  /**
-   * Dosya uzantısına bakarak tür tespit edebiliriz.
-   * Örneğin:
-   *   - .jpg, .jpeg, .png, .gif => image
-   *   - .pdf => pdf
-   *   - diğer => download link
-   */
-  const fileExtension = filePath.split(".").pop().toLowerCase();
-  const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "svg"].includes(
-    fileExtension
-  );
-  const isPdf = fileExtension === "pdf";
-
-  if (isImage) {
-    return (
-      <div className="w-28 h-28 border rounded flex items-center justify-center overflow-hidden">
-        <img
-          src={filePath}
-          alt="Attachment"
-          className="object-cover w-full h-full"
-        />
-      </div>
-    );
-  } else if (isPdf) {
-    return (
-      <div className="w-28 h-28 border rounded flex items-center justify-center overflow-hidden bg-gray-50">
-        <embed
-          src={filePath}
-          type="application/pdf"
-          width="100%"
-          height="100%"
-        />
-      </div>
-    );
-  } else {
-    // PDF veya resim dışında bir dosya ise basit link verelim:
-    return (
-      <a
-        href={filePath}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="underline text-blue-600"
-      >
-        Dosyayı indir
-      </a>
-    );
-  }
-}
-
-// Dosya türü kontrol fonksiyonları - component dışında tanımlayın
 const isImageFile = (filePath) => {
   const ext = filePath?.split(".").pop()?.toLowerCase();
   return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext);

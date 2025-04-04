@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchProjects, createProject } from "./projectApi";
+import { fetchProjects } from "./projectApi";
 
-const projectsSlice = createSlice({
+// slice tanımı
+const projectSlice = createSlice({
   name: "projects",
   initialState: {
-    list: [],
+    items: [],
     status: "idle",
     error: null,
   },
@@ -16,16 +17,13 @@ const projectsSlice = createSlice({
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.list = action.payload;
+        state.items = action.payload;
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
-      })
-      .addCase(createProject.fulfilled, (state, action) => {
-        state.list.push(action.payload);
       });
   },
 });
 
-export default projectsSlice.reducer;
+export default projectSlice.reducer;

@@ -20,7 +20,7 @@ export default function ProjectPage() {
     dispatch(fetchProjects());
   }, [dispatch]);
 
-  const filteredProjects = list.filter((project) =>
+  const filteredProjects = (list || []).filter((project) =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

@@ -34,38 +34,64 @@ namespace JiraClone.Controllers
         }
 
         [HttpPost("{id}/upload")]
-        public async Task<IActionResult> UploadFile(int id, IFormFile file)
+        public async Task<IActionResult> UploadFiles(int id, [FromForm] List<IFormFile> files)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("Dosya yüklenemedi: Dosya bulunamadı veya boş.");
+            if (files == null || !files.Any())
+                return BadRequest("Dosya yüklenemedi: Dosyalar bulunamadı veya boş.");
 
-            var task = await _context.Tasks.FindAsync(id);
+            var task = await _context.Tasks
+                .Include(t => t.Attachments)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
             if (task == null)
                 return NotFound();
 
             try
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "tasks", id.ToString());
+                var uploadsFolder = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot", // wwwroot klasörüne kaydet
+                    "uploads",
+                    "tasks",
+                    id.ToString()
+                );
                 Directory.CreateDirectory(uploadsFolder);
 
-                var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
+                var filePaths = new List<string>();
+                var newAttachments = new List<TaskAttachment>();
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                foreach (var file in files)
                 {
-                    await file.CopyToAsync(stream);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    // Göreceli URL yolu oluştur
+                    var relativePath = $"/uploads/tasks/{id}/{uniqueFileName}";
+
+                    var attachment = new TaskAttachment
+                    {
+                        TaskItemId = id,
+                        FilePath = relativePath,
+                        FileName = file.FileName
+                    };
+
+                    newAttachments.Add(attachment);
+                    filePaths.Add(relativePath);
                 }
 
-                // Dosya yolunu göreceli yol olarak kaydet
-                var relativePath = $"/uploads/tasks/{id}/{fileName}";
-                task.Attachment = relativePath;
+                task.Attachments.AddRange(newAttachments);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { FilePath = relativePath });
+                return Ok(new { FilePaths = filePaths });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Dosya yükleme hatası: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
     }

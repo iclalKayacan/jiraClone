@@ -1,24 +1,51 @@
-// /src/components/FileUploadPreview.jsx
 "use client";
-import React, { useState, useRef } from "react";
-import { uploadFile } from "../api/fileUpload";
+import React, { useRef, useState } from "react";
+import axios from "axios";
 
 export default function FileUploadPreview({ taskId, onFileUploadComplete }) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
     setUploading(true);
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     try {
-      const filePath = await uploadFile(taskId, file);
-      onFileUploadComplete?.(filePath);
+      const response = await axios.post(
+        `https://localhost:44337/api/TaskItem/${taskId}/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: false,
+        }
+      );
+
+      console.log("Upload response:", response.data);
+
+      // Hem filePaths hem FilePaths destekleniyor
+      const uploadedPaths = response.data.filePaths || response.data.FilePaths;
+      if (uploadedPaths) {
+        onFileUploadComplete?.(uploadedPaths);
+      } else {
+        console.warn("Sunucu cevap verdi ama dosya yolu yok:", response.data);
+      }
     } catch (error) {
-      console.error("Dosya yükleme hatası:", error);
+      console.error("Dosya yüklenirken hata:", error);
+      alert("Dosya yüklenirken bir hata oluştu: " + error.message);
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -28,6 +55,7 @@ export default function FileUploadPreview({ taskId, onFileUploadComplete }) {
         ref={fileInputRef}
         type="file"
         onChange={handleFileChange}
+        multiple
         className="hidden"
         accept="image/*,application/pdf"
       />

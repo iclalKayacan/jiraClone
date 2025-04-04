@@ -1,19 +1,23 @@
 import axios from "axios";
 
-export async function uploadFile(taskId, file) {
+export async function uploadFile(taskId, files) {
   const formData = new FormData();
-  formData.append("file", file);
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
 
-  try {
-    const response = await axios.post(
-      `https://localhost:44337/api/TaskItem/${taskId}/upload`,
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+  const response = await axios.post(
+    `https://localhost:44337/api/TaskItem/${taskId}/upload`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      // CORS ayarlarını sunucuna göre düzenle:
+      withCredentials: false,
+    }
+  );
 
-    return response.data.FilePath;
-  } catch (error) {
-    console.error("Dosya yükleme hatası:", error);
-    throw error;
-  }
+  // Backend artık 'filePaths' döndürüyor (küçük f)
+  return response.data.filePaths;
 }
