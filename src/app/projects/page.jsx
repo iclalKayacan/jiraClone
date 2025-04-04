@@ -6,21 +6,24 @@ import { fetchProjects } from "@/store/projects/projectApi";
 import { FiSearch } from "react-icons/fi";
 import NewProjectModal from "@/components/NewProjectModal";
 import { useRouter } from "next/navigation";
+import { fetchMyProjects } from "@/store/projects/projectApi";
 
 export default function ProjectPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { list, status, error } = useSelector((state) => state.projects);
+  const { myProjects, status, error } = useSelector((state) => state.projects);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchProjects());
-  }, [dispatch]);
+    if (status === "idle") {
+      dispatch(fetchMyProjects());
+    }
+  }, [dispatch, status]);
 
-  const filteredProjects = (list || []).filter((project) =>
+  const filteredProjects = (myProjects || []).filter((project) =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

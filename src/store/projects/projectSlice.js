@@ -1,28 +1,50 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchProjects } from "./projectApi";
+import * as projectApi from "./projectApi";
 
-// slice tanımı
+const initialState = {
+  list: [],
+  myProjects: [],
+  status: "idle",
+  error: null,
+};
+
 const projectSlice = createSlice({
   name: "projects",
-  initialState: {
-    items: [],
-    status: "idle",
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // 1) fetchProjects
     builder
-      .addCase(fetchProjects.pending, (state) => {
+      .addCase(projectApi.fetchProjects.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchProjects.fulfilled, (state, action) => {
+      .addCase(projectApi.fetchProjects.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.items = action.payload;
+        state.list = action.payload;
       })
-      .addCase(fetchProjects.rejected, (state, action) => {
+      .addCase(projectApi.fetchProjects.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       });
+
+    // 2) fetchMyProjects
+    builder
+      .addCase(projectApi.fetchMyProjects.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(projectApi.fetchMyProjects.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.myProjects = action.payload;
+      })
+      .addCase(projectApi.fetchMyProjects.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      });
+
+    // 3) createProject
+    builder.addCase(projectApi.createProject.fulfilled, (state, action) => {
+      state.list.push(action.payload);
+    });
   },
 });
 

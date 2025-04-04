@@ -1,13 +1,14 @@
+// @/api/axiosInstance.js
 import axios from "axios";
-import store from "../store/store";
 
 const axiosInstance = axios.create({
   baseURL: "https://localhost:44337/api",
 });
 
+// Her istekten önce JWT token ekleyelim
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = store.getState().user.token;
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

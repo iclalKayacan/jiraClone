@@ -1,8 +1,11 @@
+"use client";
+
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  token: localStorage.getItem("token") || null,
-  userInfo: null,
+  user: null,
+  token: null,
+  isAuthenticated: false,
 };
 
 const userSlice = createSlice({
@@ -10,12 +13,16 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      state.token = action.payload.token;
-      state.userInfo = action.payload.user;
+      const { user, token } = action.payload;
+      state.user = user;
+      state.token = token;
+      state.isAuthenticated = true;
+      localStorage.setItem("token", token);
     },
     logout: (state) => {
+      state.user = null;
       state.token = null;
-      state.userInfo = null;
+      state.isAuthenticated = false;
       localStorage.removeItem("token");
     },
   },

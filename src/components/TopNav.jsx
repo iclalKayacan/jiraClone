@@ -5,15 +5,18 @@ import Link from "next/link";
 import { useState } from "react";
 import LoginModal from "./LoginModal";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../store/user/userSlice";
+import { logout } from "@/store/user/userSlice";
+import { useRouter } from "next/navigation";
 
 export default function TopNav() {
   const [showLogin, setShowLogin] = useState(false);
   const { userInfo, token } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleLogout = () => {
     dispatch(logout());
+    router.push("/login");
   };
 
   return (
