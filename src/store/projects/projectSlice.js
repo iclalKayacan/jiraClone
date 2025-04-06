@@ -44,6 +44,7 @@ const projectSlice = createSlice({
     // 3) createProject
     builder.addCase(projectApi.createProject.fulfilled, (state, action) => {
       state.list.push(action.payload);
+      state.myProjects.push(action.payload);
     });
   },
 });

@@ -8,16 +8,18 @@ import CreateTaskPopup from "./CreateTaskPopup";
 import TaskDetailModal from "./TaskDetailModal";
 
 export default function Column({ column, projectId }) {
+  if (!column) return null;
+
   const dispatch = useDispatch();
   const [showPopup, setShowPopup] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(column.title);
+  const [editedTitle, setEditedTitle] = useState(column?.title || "");
   const [showMenu, setShowMenu] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const menuRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Redux'tan o kolona ait görevleri çek
+  // Bu kolona ait görevleri al
   const tasks = useSelector((state) =>
     state.tasks.items.filter((task) => task.columnId === column.id)
   );
