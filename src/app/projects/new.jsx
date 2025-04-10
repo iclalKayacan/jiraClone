@@ -12,28 +12,17 @@ export default function NewProjectPage() {
   const [type, setType] = useState("Team-managed business");
   const [lead, setLead] = useState("");
 
-  // Proje oluştur
   const handleCreate = (e) => {
     e.preventDefault();
     const newId = Date.now();
 
-    // columns'i hiç tanımlamazsanız, context'te defaultColumns ekleyecek.
-    // Ama isterseniz aşağıya columns: [ { id:..., title:...}, ... ] şeklinde
-    // de ekleyebilirsiniz.
     const newProj = {
       id: newId,
       name,
       key,
       type,
       lead,
-      icon: "/cloud-icon.png",
       isStarred: false,
-      // columns: [] // Boş geçebilirsiniz veya context'e bırakırsınız
-      // columns: [
-      //   { id: "col-1", title: "TO DO", tasks: [] },
-      //   { id: "col-2", title: "IN PROGRESS", tasks: [] },
-      //   { id: "col-3", title: "DONE", tasks: [] },
-      // ],
     };
 
     addProject(newProj);

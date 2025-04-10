@@ -8,7 +8,7 @@ export default function ProjectNav({ project }) {
     <div className="flex items-center justify-between px-6 py-4 bg-blue-50 text-gray-700 border-b border-gray-200">
       <div className="flex items-center gap-2">
         <img
-          src={project.icon || "/cloud-icon.png"}
+          src={project.icon}
           alt="Project Icon"
           className="w-6 h-6 object-contain"
         />
@@ -33,7 +33,7 @@ export default function ProjectNav({ project }) {
         <a href="#" className="hover:text-gray-900">
           Timeline
         </a>
-       
+
         <a href="#" className="hover:text-gray-900 hidden md:inline-block">
           Pages
         </a>

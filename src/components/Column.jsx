@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { updateColumnTitle, deleteColumn } from "@/store/columns/columnSlice";
 import { createTask } from "@/store/tasks/taskSlice";
 import CreateTaskPopup from "./CreateTaskPopup";
 import TaskDetailModal from "./TaskDetailModal";
+import { fetchProjectById } from "@/store/projects/projectApi";
 
 export default function Column({ column, projectId }) {
   if (!column) return null;
@@ -19,10 +20,8 @@ export default function Column({ column, projectId }) {
   const menuRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Bu kolona ait görevleri al
-  const tasks = useSelector((state) =>
-    state.tasks.items.filter((task) => task.columnId === column.id)
-  );
+  // ✨ Artık Redux'tan filtrelemiyoruz, doğrudan column.tasks kullanıyoruz
+  const tasks = column.tasks || [];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -41,6 +40,7 @@ export default function Column({ column, projectId }) {
     }
   }, [isEditing]);
 
+  // Yeni görev oluşturma
   const handleCreateTask = async (taskData) => {
     try {
       const newTask = {
@@ -51,26 +51,35 @@ export default function Column({ column, projectId }) {
         progress: 0,
       };
       await dispatch(createTask(newTask)).unwrap();
+
+      // createTask sonrası projeyi tekrar çekerseniz, column.tasks da güncellenir
+      await dispatch(fetchProjectById(projectId)).unwrap();
+
       setShowPopup(false);
     } catch (error) {
       console.error("Görev oluşturulamadı:", error);
     }
   };
 
+  // Kolon adını güncelleme
   const handleTitleSubmit = async () => {
     const trimmed = editedTitle.trim();
     if (trimmed && trimmed !== column.title) {
       try {
-        const result = await dispatch(
+        await dispatch(
           updateColumnTitle({
             id: column.id,
             title: trimmed,
           })
         ).unwrap();
-        setEditedTitle(result.title);
+
+        // Kolon güncelleme sonrası projeyi tekrar çekiyoruz
+        await dispatch(fetchProjectById(projectId)).unwrap();
+
+        setEditedTitle(trimmed);
       } catch (error) {
         console.error("Kolon adı güncellenemedi:", error);
-        setEditedTitle(column.title);
+        setEditedTitle(column.title); // Hata alırsak orijinal başlığa dön
       }
     } else {
       setEditedTitle(column.title);
@@ -78,10 +87,12 @@ export default function Column({ column, projectId }) {
     setIsEditing(false);
   };
 
+  // Kolonu silme
   const handleDeleteColumn = async () => {
     if (window.confirm("Bu kolonu silmek istediğine emin misin?")) {
       try {
         await dispatch(deleteColumn(column.id)).unwrap();
+        await dispatch(fetchProjectById(projectId)).unwrap();
       } catch (error) {
         console.error("Kolon silinemedi:", error);
       }
@@ -160,32 +171,36 @@ export default function Column({ column, projectId }) {
 
       {/* Görevler */}
       <div className="p-2 flex flex-col gap-3 min-h-[50px]">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            onClick={() => setSelectedTask(task)}
-            className="border border-gray-300 rounded p-3 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[80px] flex flex-col"
-          >
-            <h3 className="text-sm font-medium text-gray-800 mb-2">
-              {task.title}
-            </h3>
-            <div className="mt-auto">
-              <div className="text-xs text-gray-500 flex items-center gap-2">
-                <span>{task.date}</span>
-                {task.label && (
-                  <span className="px-2 py-0.5 bg-blue-50 border border-blue-200 text-blue-600 rounded-full">
-                    {task.label}
-                  </span>
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            <div
+              key={task.id}
+              onClick={() => setSelectedTask(task)}
+              className="border border-gray-300 rounded p-3 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[80px] flex flex-col"
+            >
+              <h3 className="text-sm font-medium text-gray-800 mb-2">
+                {task.title}
+              </h3>
+              <div className="mt-auto">
+                <div className="text-xs text-gray-500 flex items-center gap-2">
+                  <span>{task.date}</span>
+                  {task.label && (
+                    <span className="px-2 py-0.5 bg-blue-50 border border-blue-200 text-blue-600 rounded-full">
+                      {task.label}
+                    </span>
+                  )}
+                </div>
+                {task.progress > 0 && (
+                  <div className="text-xs text-gray-500 mt-1.5">
+                    Progress: {task.progress}%
+                  </div>
                 )}
               </div>
-              {task.progress > 0 && (
-                <div className="text-xs text-gray-500 mt-1.5">
-                  Progress: {task.progress}%
-                </div>
-              )}
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-gray-500 text-sm">No tasks available</p>
+        )}
       </div>
 
       {/* Görev oluşturma */}

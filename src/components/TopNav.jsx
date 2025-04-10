@@ -76,11 +76,7 @@ export default function TopNav() {
         {token ? (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
-              <img
-                src="/user-avatar.jpg"
-                alt="User"
-                className="w-full h-full object-cover"
-              />
+              <img alt="User" className="w-full h-full object-cover" />
             </div>
             <span className="text-gray-600">{userInfo?.name || "User"}</span>
             <button

@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Base URL'i düzeltelim - /Projects sonunda olmamalı
+// Base URL'niz:
 const BASE_URL = "https://localhost:44337/api";
 
-// Axios instance'ı düzeltelim
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -12,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor aynı kalabilir
+// Request Interceptor - Token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -21,7 +20,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Endpoint'leri düzeltelim
+// Tüm projeleri çek
 export const fetchProjects = createAsyncThunk(
   "projects/fetchProjects",
   async () => {
@@ -30,7 +29,7 @@ export const fetchProjects = createAsyncThunk(
   }
 );
 
-// my-projects endpoint'ini düzeltelim
+// Kullanıcının kendi projelerini çek
 export const fetchMyProjects = createAsyncThunk(
   "projects/fetchMyProjects",
   async () => {
@@ -45,7 +44,7 @@ export const fetchMyProjects = createAsyncThunk(
   }
 );
 
-// Diğer endpoint'leri de düzeltelim
+// Yeni proje oluştur
 export const createProject = createAsyncThunk(
   "projects/createProject",
   async (projectData) => {
@@ -54,6 +53,7 @@ export const createProject = createAsyncThunk(
   }
 );
 
+// Proje detayı (ve kolonları) getir
 export const fetchProjectById = createAsyncThunk(
   "projects/fetchProjectById",
   async (projectId) => {

@@ -67,7 +67,10 @@ const columnSlice = createSlice({
       })
       .addCase(fetchColumns.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.items = action.payload;
+        state.items = action.payload.map((column) => ({
+          ...column,
+          tasks: column.tasks || [], // Ensure tasks are included and default to an empty array if missing
+        }));
       })
       .addCase(fetchColumns.rejected, (state, action) => {
         state.status = "failed";
@@ -87,7 +90,7 @@ const columnSlice = createSlice({
           // Mevcut kolonun tasks array'ini koru
           state.items[index] = {
             ...updated,
-            tasks: state.items[index].tasks || [],
+            tasks: state.items[index].tasks || [], // Preserve tasks
           };
         }
       })

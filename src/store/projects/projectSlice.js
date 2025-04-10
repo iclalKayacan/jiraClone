@@ -1,9 +1,11 @@
+// projectSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 import * as projectApi from "./projectApi";
 
 const initialState = {
   list: [],
   myProjects: [],
+  selectedProject: null, // detayta tutmak için
   status: "idle",
   error: null,
 };
@@ -11,7 +13,7 @@ const initialState = {
 const projectSlice = createSlice({
   name: "projects",
   initialState,
-  reducers: {},
+  reducers: {}, // Bu örnekte henüz basit reducer yok
   extraReducers: (builder) => {
     // 1) fetchProjects
     builder
@@ -46,6 +48,21 @@ const projectSlice = createSlice({
       state.list.push(action.payload);
       state.myProjects.push(action.payload);
     });
+
+    // 4) fetchProjectById
+    builder
+      .addCase(projectApi.fetchProjectById.pending, (state) => {
+        state.status = "loading";
+      })
+
+      .addCase(projectApi.fetchProjectById.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.selectedProject = action.payload; // Kolonlar burada gelirse ekrana yansır
+      })
+      .addCase(projectApi.fetchProjectById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      });
   },
 });
 

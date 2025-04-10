@@ -11,7 +11,6 @@ export function ProjectsProvider({ children }) {
       key: "FS",
       type: "Team-managed business",
       lead: "sabo",
-      icon: "/cloud-icon.png",
       isStarred: true,
       columns: [
         {

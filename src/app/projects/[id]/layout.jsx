@@ -3,36 +3,49 @@
 import { useParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { fetchProjects } from "@/store/projects/projectApi";
+import { fetchProjects, fetchProjectById } from "@/store/projects/projectApi";
 import SideBar from "@/components/SideBar";
 import ProjectNav from "@/components/ProjectNav";
 
 export default function ProjectLayout({ children }) {
   const params = useParams();
   const dispatch = useDispatch();
-  const { items: projects, status } = useSelector((state) => state.projects);
+
+  const {
+    list: projects,
+    selectedProject,
+    status,
+    error,
+  } = useSelector((state) => state.projects);
+
+  const projectId = Number(params.id);
+  const project = projects?.find((p) => p.id === projectId) || selectedProject;
 
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchProjects());
     }
-  }, [dispatch, status]);
 
-  // Loading durumu için
-  if (status === "loading") {
-    return <div>Loading...</div>;
+    // Eğer seçili proje yoksa, tekil olarak getir
+    if (!project && projectId) {
+      dispatch(fetchProjectById(projectId));
+    }
+  }, [dispatch, status, projectId, project]);
+
+  if (status === "loading" || !project) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500">Loading project...</p>
+      </div>
+    );
   }
 
-  // Error durumu için
-  if (status === "failed") {
-    return <div>Error loading project</div>;
-  }
-
-  // Projects array'i hazır olduğunda
-  const project = projects?.find((p) => p.id === Number(params.id));
-
-  if (!project) {
-    return <div>Project not found</div>;
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-red-500">Error loading project: {error}</p>
+      </div>
+    );
   }
 
   return (
@@ -46,7 +59,10 @@ export default function ProjectLayout({ children }) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1">{children}</div>
+      <div className="flex-1">
+        <ProjectNav project={project} />
+        {children}
+      </div>
     </div>
   );
 }
